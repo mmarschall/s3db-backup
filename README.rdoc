@@ -4,11 +4,11 @@ Its good practice to have a backup of your database ready at some other place th
 
 == Backup Your Database To Amazon S3
 
-To get your data out of your own data center and store it somewhere save, amazon S3 is a great candidate. But, of course, you do not want to let anyone be able to read your application database. That's why _s3db-backup_ is encrypting your dump before sending it to amazon S3.
+To get your data out of your own data center and store it somewhere save, amazon S3 is a great candidate. But, of course, you do not want to let anyone be able to read your application database. That's why <em>s3db-backup</em> is encrypting your dump before sending it to amazon S3.
 
 == Requirements
 
-As _s3db-backup_ is using standard Unix tools for the heavy lifting, please make sure you have the following installed on your machine:
+As <em>s3db-backup</em> is using standard Unix tools for the heavy lifting, please make sure you have the following installed on your machine:
 
 * mysqldump (comes with the mysql client, should be there)
 * gzip (never saw a system without it)
@@ -20,9 +20,9 @@ And, of course, you'll need to sign up for an Amazon S3 account and create a buc
 
 == Getting Started
 
-Currently, _s3db-backup_ only supports MySQL databases and works from within a Rails application. Here are the steps to get you started:
+Currently, <em>s3db-backup</em> only supports MySQL databases and works from within a Rails application. Here are the steps to get you started:
 
-* Install the _s3db-backup_ gem
+* Install the <em>s3db-backup</em> gem
 
 	sudo gem install s3db-backup
 
@@ -62,7 +62,7 @@ Currently, _s3db-backup_ only supports MySQL databases and works from within a R
 	development: 
 	    bucket: "my_app-development"
 
-_s3db-backup_ expects the buckets you name there to exist. Please make sure they do (using the Amazon AWS Management Console or any other Amazon Management Tool)
+<em>s3db-backup</em> expects the buckets you name there to exist. Please make sure they do (using the Amazon AWS Management Console or any other Amazon Management Tool)
 
 * Create +db/secret.txt+ containing any long and random string as your encryption/decryption key for ccrypt
 
@@ -71,7 +71,7 @@ _s3db-backup_ expects the buckets you name there to exist. Please make sure they
 == Restoring a Backup Manually
 
 I do not trust in backup systems, which do everything on their own. In emergency I want to be able to restore my data manually. 
-As _s3db-backup_ only uses standard Unix tools for the job, its pretty easy. Here are the steps to manually restore your database
+As <em>s3db-backup</em> only uses standard Unix tools for the job, its pretty easy. Here are the steps to manually restore your database
 
 * Download the latest backup from your Amazon S3 bucket e.g. +mysql-my_app-production-22-09-2010-11h24m10s.sql.gz.cpt+
 * Decrypt the file using your key from +db/secret.txt+

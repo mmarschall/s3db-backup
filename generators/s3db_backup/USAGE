@@ -1,0 +1,10 @@
+Description:
+    generates rake tasks for backups and restores to and from amazon s3
+
+Example:
+    ./script/generate s3db_backup
+
+    This will create:
+        lib/tasks/s3db_backup.rake
+        config/s3_config.yml
+        db/secret.txt

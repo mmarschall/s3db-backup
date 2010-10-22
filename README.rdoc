@@ -23,8 +23,17 @@ Currently, <em>s3db-backup</em> only supports MySQL databases and works from wit
 * Install the <em>s3db-backup</em> gem
 
 	sudo gem install s3db-backup
+	
+* Run the <em>s3db_backup</em> generator to generate the necessary config files and rake tasks
 
-* Store your AWS access credentials and your desired S3 buckets in a new file named <tt>config/s3_config.yml</tt>:
+	$ script/generate s3db_backup
+	
+This will generate the following files:
+# <tt>config/s3_config.yml</tt>
+# <tt>db/secret.txt</tt>
+# <tt>lib/tasks/db.rake</tt>
+
+* Store your AWS access credentials and your desired S3 buckets in the new <tt>config/s3_config.yml</tt>:
 
 	aws_access_key_id: "<your aws access key here>"
 	secret_access_key: "<your aws secret key here>"
@@ -37,7 +46,7 @@ Currently, <em>s3db-backup</em> only supports MySQL databases and works from wit
 
 <em>s3db-backup</em> expects the buckets you name there to exist. Please make sure they do (using the Amazon AWS Management Console or any other Amazon Management Tool)
 
-* Create <tt>db/secret.txt</tt> containing any long and random string as your encryption/decryption key for ccrypt
+* Put a long and random string as your encryption/decryption key for <tt>ccrypt</tt> into <tt>db/secret.txt</tt>
 
 	$ echo "my secret key" > db/secret.txt
 	
@@ -51,33 +60,8 @@ When its done, go to your amazon S3 bucket and see your shiny new backup file th
 	
 == Restoring a Backup Using <tt>rake</tt>
 
-To be able to <em>fetch</em> your backups from S3 and <em>load</em> them into your environment (development or production) you can create a set of rake tasks:
+To be able to <em>fetch</em> your backups from S3 and <em>load</em> them into your environment (development or production) you can use a set of rake tasks defined in <tt>lib/tasks/s3db_backup.rake</tt>:
 
-* Create <tt>lib/tasks/db.rake</tt> inside your rails application copying this:
-
-	require 'right_aws'
-	require 'progressbar'
-	require 's3db-backup'
-
-	namespace :db do
-	  namespace :seed do
-	    desc "fetch the latest prodcution dump from our Amazon S3 remote backup"
-	    task :fetch => :environment do
-	      S3DbBackup.fetch
-	    end
-
-	    desc "load the seed data from db/latest_prod_dump.sql.gz into the database and anonymize it"
-	    task :load => :environment do
-	      S3DbBackup.load
-	    end
-
-	    desc "anonymize all email columns in the database"
-	    task :anonymize => :environment do
-	      S3DbBackup.anonymize
-	    end
-	  end
-	end
-	
 * Fetch the latest backup from S3 to your local disk:
 
 	$ rake db:seed:fetch

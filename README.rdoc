@@ -10,7 +10,7 @@ To get your data out of your own data center and store it somewhere save, amazon
 
 As <em>s3db-backup</em> is using standard Unix tools for the heavy lifting, please make sure you have the following installed on your machine:
 
-* mysqldump (comes with the mysql client, should be there)
+* <tt>mysqldump</tt> (comes with the mysql client, should be there)
 * gzip (never saw a system without it)
 * ccrypt (you might need to install it: +apt-get install ccrypt+ (Debian, Ubuntu), +yum install ccrypt+ (Redhat, CentOS), +brew install ccrypt+ (Mac OS X using homebrew))
 * right_aws gem (+gem install right_aws+) to talk to Amazon S3

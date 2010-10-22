@@ -5,7 +5,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{s3db-backup}
-  s.version = "0.2.7"
+  s.version = "0.3.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Matthias Marschall"]
@@ -25,7 +25,7 @@ Gem::Specification.new do |s|
      "VERSION",
      "generators/s3db_backup/USAGE",
      "generators/s3db_backup/s3db_backup_generator.rb",
-     "generators/s3db_backup/templates/s3_config.yml",
+     "generators/s3db_backup/templates/s3_config.yml.erb",
      "generators/s3db_backup/templates/s3db_backup.rake",
      "generators/s3db_backup/templates/secret.txt",
      "lib/s3db-backup.rb",

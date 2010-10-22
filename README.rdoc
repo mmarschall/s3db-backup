@@ -2,7 +2,7 @@
 
 Its good practice to have a backup of your database ready at some other place than your production setup in case anything goes badly wrong there. And its a good idea to test your backups regularily. This gem will help you do both in a snap.
 
-== Backup Your Database To Amazon S3
+== Backup Your MySQL Database To Amazon S3
 
 To get your data out of your own data center and store it somewhere save, amazon S3 is a great candidate. But, of course, you do not want to let anyone be able to read your application database. That's why <em>s3db-backup</em> is encrypting your dump before sending it to amazon S3.
 
@@ -12,7 +12,7 @@ As <em>s3db-backup</em> is using standard Unix tools for the heavy lifting, plea
 
 * <tt>mysqldump</tt> (comes with the mysql client, should be there)
 * <tt>gzip</tt> (never saw a system without it)
-* <tt>ccrypt</tt> (you might need to install it: <tt>apt-get install ccrypt</tt> (Debian, Ubuntu), <tt>yum install ccrypt</tt> (Redhat, CentOS), <tt>brew install ccrypt</tt> (Mac OS X using homebrew))
+* <tt>ccrypt</tt> (you might need to install it: <tt>apt-get install ccrypt</tt> (Debian, Ubuntu), <tt>yum install ccrypt</tt> (Redhat, CentOS), or <tt>brew install ccrypt</tt> (Mac OS X using homebrew))
 
 And, of course, you'll need to sign up for an Amazon S3 account and create a bucket using the AWS Management Console (or any other way)
 
@@ -28,10 +28,7 @@ Currently, <em>s3db-backup</em> only supports MySQL databases and works from wit
 
 	$ script/generate s3db_backup
 	
-This will generate the following files:
-# <tt>config/s3_config.yml</tt>
-# <tt>db/secret.txt</tt>
-# <tt>lib/tasks/db.rake</tt>
+This will generate the following files: <tt>config/s3_config.yml</tt>, <tt>db/secret.txt</tt>, and <tt>lib/tasks/db.rake</tt>
 
 * Store your AWS access credentials and your desired S3 buckets in the new <tt>config/s3_config.yml</tt>:
 

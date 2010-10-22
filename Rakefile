@@ -10,6 +10,8 @@ begin
     gem.email = "mm@agileweboperations.com"
     gem.homepage = "http://github.com/mmarschall/s3db-backup"
     gem.authors = ["Matthias Marschall"]
+    gem.add_dependency "right_aws", "~> 2.0.0"
+    gem.add_dependency "progressbar", ">= 0.9.0"
     gem.add_development_dependency "rspec", ">= 1.2.9"
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end

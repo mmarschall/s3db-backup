@@ -13,8 +13,6 @@ As <em>s3db-backup</em> is using standard Unix tools for the heavy lifting, plea
 * <tt>mysqldump</tt> (comes with the mysql client, should be there)
 * <tt>gzip</tt> (never saw a system without it)
 * <tt>ccrypt</tt> (you might need to install it: <tt>apt-get install ccrypt</tt> (Debian, Ubuntu), <tt>yum install ccrypt</tt> (Redhat, CentOS), <tt>brew install ccrypt</tt> (Mac OS X using homebrew))
-* right_aws gem (<tt>gem install right_aws</tt>) to talk to Amazon S3
-* progressbar gem (<tt>gem install progressbar</tt>)
 
 And, of course, you'll need to sign up for an Amazon S3 account and create a bucket using the AWS Management Console (or any other way)
 
@@ -51,7 +49,7 @@ Currently, <em>s3db-backup</em> only supports MySQL databases and works from wit
 	  end
 	end
 	
-* Store your AWS access credentials and your desired S3 buckets in +config/s3_config.yml+
+* Store your AWS access credentials and your desired S3 buckets in a new file named <tt>config/s3_config.yml</tt>:
 
 	aws_access_key_id: "<your aws access key here>"
 	secret_access_key: "<your aws secret key here>"
@@ -66,7 +64,7 @@ Currently, <em>s3db-backup</em> only supports MySQL databases and works from wit
 
 * Create <tt>db/secret.txt</tt> containing any long and random string as your encryption/decryption key for ccrypt
 
-	echo "my secret key" > db/secret.txt
+	$ echo "my secret key" > db/secret.txt
 	
 == Restoring a Backup Manually
 

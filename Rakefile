@@ -5,8 +5,8 @@ begin
   require 'jeweler'
   Jeweler::Tasks.new do |gem|
     gem.name = "s3db-backup"
-    gem.summary = %Q{TODO: one-line summary of your gem}
-    gem.description = %Q{TODO: longer description of your gem}
+    gem.summary = %Q{Backup and restore your database to amazon S3, encrypting and compressing it on the way}
+    gem.description = %Q{This gem helps you to easily create backups of your database and store them on amazon S3. It uses standard Unix tools to do the heavy lifting like dumping the db (mysqldump), compressing (gzip, tar), and encrypting (ccrypt).}
     gem.email = "mm@agileweboperations.com"
     gem.homepage = "http://github.com/mmarschall/s3db-backup"
     gem.authors = ["Matthias Marschall"]

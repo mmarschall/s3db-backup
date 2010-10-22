@@ -1,6 +1,89 @@
-= s3db-backup
+= _s3db-backup_ for Rails
 
-Description goes here.
+Its good practice to have a backup of your database ready at some other place than your production setup in case anything goes badly wrong there. And its a good idea to test your backups regularily. This gem will help you do both in a snap.
+
+== Backup Your Database To Amazon S3
+
+To get your data out of your own data center and store it somewhere save, amazon S3 is a great candidate. But, of course, you do not want to let anyone be able to read your application database. That's why _s3db-backup_ is encrypting your dump before sending it to amazon S3.
+
+== Requirements
+
+As _s3db-backup_ is using standard Unix tools for the heavy lifting, please make sure you have the following installed on your machine:
+
+* mysqldump (comes with the mysql client, should be there)
+* gzip (never saw a system without it)
+* ccrypt (you might need to install it: +apt-get install ccrypt+ (Debian, Ubuntu), +yum install ccrypt+ (Redhat, CentOS), +brew install ccrypt+ (Mac OS X using homebrew))
+* right_aws gem (+gem install right_aws+) to talk to Amazon S3
+* progressbar gem (+gem install progressbar+)
+
+And, of course, you'll need to sign up for an Amazon S3 account and create a bucket using the AWS Management Console (or any other way)
+
+== Getting Started
+
+Currently, _s3db-backup_ only supports MySQL databases and works from within a Rails application. Here are the steps to get you started:
+
+* Install the _s3db-backup_ gem
+
+	sudo gem install s3db-backup
+
+* Create +lib/tasks/db.rake+ inside your rails application copying this:
+
+	require 'right_aws'
+	require 'progressbar'
+	require 's3db-backup'
+
+	namespace :db do
+	  namespace :seed do
+	    desc "fetch the latest prodcution dump from our Amazon S3 remote backup"
+	    task :fetch => :environment do
+	      S3DbBackup.fetch
+	    end
+
+	    desc "load the seed data from db/latest_prod_dump.sql.gz into the database and anonymize it"
+	    task :load => :environment do
+	      S3DbBackup.load
+	    end
+
+	    desc "anonymize all email columns in the database"
+	    task :anonymize => :environment do
+	      S3DbBackup.anonymize
+	    end
+	  end
+	end
+	
+* Store your AWS access credentials and your desired S3 buckets in +config/s3_config.yml+
+
+	aws_access_key_id: "<your aws access key here>"
+	secret_access_key: "<your aws secret key here>"
+
+	production:
+	    bucket: "my_app-production"
+
+	development: 
+	    bucket: "my_app-development"
+
+_s3db-backup_ expects the buckets you name there to exist. Please make sure they do (using the Amazon AWS Management Console or any other Amazon Management Tool)
+
+* Create +db/secret.txt+ containing any long and random string as your encryption/decryption key for ccrypt
+
+	echo "my secret key" > db/secret.txt
+	
+== Restoring a Backup Manually
+
+I do not trust in backup systems, which do everything on their own. In emergency I want to be able to restore my data manually. 
+As _s3db-backup_ only uses standard Unix tools for the job, its pretty easy. Here are the steps to manually restore your database
+
+* Download the latest backup from your Amazon S3 bucket e.g. +mysql-my_app-production-22-09-2010-11h24m10s.sql.gz.cpt+
+* Decrypt the file using your key from +db/secret.txt+
+	ccdecrypt mysql-my_app-production-22-09-2010-11h24m10s.sql.gz.cpt
+* Unzip the SQL file
+	gunzip mysql-my_app-production-22-09-2010-11h24m10s.sql.gz
+* Re-create your database
+	rake db:create
+* Load the dump into mysql
+	mysql -u <your_db_user> -p <your_db> < mysql-my_app-production-22-09-2010-11h24m10s.sql
+	
+Now you should have your DB restored.
 
 == Note on Patches/Pull Requests
  

@@ -13,6 +13,23 @@ begin
     gem.add_dependency "right_aws", "~> 2.0.0"
     gem.add_dependency "progressbar", ">= 0.9.0"
     gem.add_development_dependency "rspec", ">= 1.2.9"
+    gem.post_install_message = <<TEXT
+
+    -------------------------------------------------------------------------------
+
+    Please put your Amazon EC2 credentials into:
+
+      $ config/s3_config.yml
+
+    and put a strong, random key into:
+    
+      $ db/secret.txt
+      
+    before running your first backup!
+    
+    -------------------------------------------------------------------------------
+
+TEXT
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
   Jeweler::GemcutterTasks.new

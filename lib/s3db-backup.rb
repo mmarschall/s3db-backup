@@ -2,7 +2,7 @@ require "right_aws"
 require "yaml"
 require "progressbar"
 
-class S3DbBackup
+class S3dbBackup
   def self.backup
     aws = YAML::load_file(File.join(Rails.root, "config", "s3_config.yml"))
     config = ActiveRecord::Base.configurations[RAILS_ENV]

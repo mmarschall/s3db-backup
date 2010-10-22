@@ -51,7 +51,7 @@ This will generate the following files: <tt>config/s3_config.yml</tt>, <tt>db/se
 	
 Dumping, encrypting, and uploading your current database is now as easy as typing one command:
 	
-	$ script/runner S3DbBackup.backup
+	$ rake s3db:backup
 	
 When its done, go to your amazon S3 bucket and see your shiny new backup file there!
 	
@@ -61,13 +61,13 @@ To be able to <em>fetch</em> your backups from S3 and <em>load</em> them into yo
 
 * Fetch the latest backup from S3 to your local disk:
 
-	$ rake db:seed:fetch
+	$ rake s3db:latest:fetch
 	
 * Load that dump into your development environment:
 
 <b>ATTENTION</b>: This step will DROP your database and re-create it from your backup. Be careful when applying to your production environment. You have been warned!
 
-	$ rake db:seed:load
+	$ rake s3db:latest:load
 	
 == Restoring a Backup Manually
 

@@ -41,11 +41,15 @@ Currently, <em>s3db-backup</em> only supports MySQL databases and works from wit
 
 	$ echo "my secret key" > db/secret.txt
 	
-* Run your first backup
-
+== Running a Backup
+	
+Dumping, encrypting, and uploading your current database is now as easy as typing one command:
+	
 	$ script/runner S3DbBackup.backup
 	
-== Restoring your backup using <tt>rake</tt>
+When its done, go to your amazon S3 bucket and see your shiny new backup file there!
+	
+== Restoring a Backup Using <tt>rake</tt>
 
 To be able to <em>fetch</em> your backups from S3 and <em>load</em> them into your environment (development or production) you can create a set of rake tasks:
 

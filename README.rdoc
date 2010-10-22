@@ -18,7 +18,7 @@ And, of course, you'll need to sign up for an Amazon S3 account and create a buc
 
 == Getting Started
 
-Currently, <em>s3db-backup</em> only supports MySQL databases and works from within a Rails application. Here are the steps to get you started:
+<em>s3db-backup</em> only supports MySQL databases and works from within a Rails application. Here are the steps to get you started:
 
 * Install the <em>s3db-backup</em> gem
 
@@ -59,11 +59,13 @@ When its done, go to your amazon S3 bucket and see your shiny new backup file th
 
 To be able to <em>fetch</em> your backups from S3 and <em>load</em> them into your environment (development or production) you can use a set of rake tasks defined in <tt>lib/tasks/s3db_backup.rake</tt>:
 
-* Fetch the latest backup from S3 to your local disk:
+* Fetch the latest backup from S3 to your local disk as <tt>db/latest_prod_dump.sql</tt>:
 
 	$ rake s3db:latest:fetch
 	
-* Load that dump into your development environment:
+Now you can either load that SQL dump with any tool you like or use a second rake task:
+	
+* Load that dump into your environment:
 
 <b>ATTENTION</b>: This step will DROP your database and re-create it from your backup. Be careful when applying to your production environment. You have been warned!
 

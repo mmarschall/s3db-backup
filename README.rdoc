@@ -24,6 +24,31 @@ Currently, <em>s3db-backup</em> only supports MySQL databases and works from wit
 
 	sudo gem install s3db-backup
 
+* Store your AWS access credentials and your desired S3 buckets in a new file named <tt>config/s3_config.yml</tt>:
+
+	aws_access_key_id: "<your aws access key here>"
+	secret_access_key: "<your aws secret key here>"
+
+	production:
+	    bucket: "my_app-production"
+
+	development: 
+	    bucket: "my_app-development"
+
+<em>s3db-backup</em> expects the buckets you name there to exist. Please make sure they do (using the Amazon AWS Management Console or any other Amazon Management Tool)
+
+* Create <tt>db/secret.txt</tt> containing any long and random string as your encryption/decryption key for ccrypt
+
+	$ echo "my secret key" > db/secret.txt
+	
+* Run your first backup
+
+	$ script/runner S3DbBackup.backup
+	
+== Restoring your backup using <tt>rake</tt>
+
+To be able to <em>fetch</em> your backups from S3 and <em>load</em> them into your environment (development or production) you can create a set of rake tasks:
+
 * Create <tt>lib/tasks/db.rake</tt> inside your rails application copying this:
 
 	require 'right_aws'
@@ -49,22 +74,15 @@ Currently, <em>s3db-backup</em> only supports MySQL databases and works from wit
 	  end
 	end
 	
-* Store your AWS access credentials and your desired S3 buckets in a new file named <tt>config/s3_config.yml</tt>:
+* Fetch the latest backup from S3 to your local disk:
 
-	aws_access_key_id: "<your aws access key here>"
-	secret_access_key: "<your aws secret key here>"
+	$ rake db:seed:fetch
+	
+* Load that dump into your development environment:
 
-	production:
-	    bucket: "my_app-production"
+<b>ATTENTION</b>: This step will DROP your database and re-create it from your backup. Be careful when applying to your production environment. You have been warned!
 
-	development: 
-	    bucket: "my_app-development"
-
-<em>s3db-backup</em> expects the buckets you name there to exist. Please make sure they do (using the Amazon AWS Management Console or any other Amazon Management Tool)
-
-* Create <tt>db/secret.txt</tt> containing any long and random string as your encryption/decryption key for ccrypt
-
-	$ echo "my secret key" > db/secret.txt
+	$ rake db:seed:load
 	
 == Restoring a Backup Manually
 

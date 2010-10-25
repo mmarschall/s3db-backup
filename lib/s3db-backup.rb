@@ -85,6 +85,6 @@ class S3dbBackup
   
   def self.sync_shared_system_files
     aws = YAML::load_file(File.join(Rails.root, "config", "s3_config.yml"))
-    system("bash -c 'AWS_ACCESS_KEY_ID=#{aws['aws_access_key_id']} AWS_SECRET_ACCESS_KEY=#{aws['secret_access_key']} AWS_CALLING_FORMAT=SUBDOMAIN $(which s3sync) -s -r #{RAILS_ROOT}/shared/system #{aws[RAILS_ENV || 'development']['bucket']}:files'")
+    system("bash -c 'AWS_ACCESS_KEY_ID=#{aws['aws_access_key_id']} AWS_SECRET_ACCESS_KEY=#{aws['secret_access_key']} AWS_CALLING_FORMAT=SUBDOMAIN $(which s3sync) -s -r #{Rails.root}/shared/system #{aws[RAILS_ENV || 'development']['bucket']}:files'")
   end
 end

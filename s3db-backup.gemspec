@@ -5,12 +5,12 @@
 
 Gem::Specification.new do |s|
   s.name = %q{s3db-backup}
-  s.version = "0.3.4"
+  s.version = "0.4.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Matthias Marschall"]
   s.date = %q{2010-10-25}
-  s.description = %q{This gem helps you to easily create backups of your database and store them on amazon S3. It uses standard Unix tools to do the heavy lifting like dumping the db (mysqldump), compressing (gzip, tar), and encrypting (ccrypt).}
+  s.description = %q{This gem helps you to easily create backups of the database of your rails app and store them on amazon S3. It uses standard Unix tools to do the heavy lifting like dumping the db (mysqldump), compressing (gzip, tar), and encrypting (ccrypt).}
   s.email = %q{mm@agileweboperations.com}
   s.extra_rdoc_files = [
     "LICENSE",
@@ -42,7 +42,7 @@ Gem::Specification.new do |s|
 
       $ config/s3_config.yml
 
-    and put a strong, random key into:
+    and a strong, random key into:
     
       $ db/secret.txt
       
@@ -54,7 +54,7 @@ Gem::Specification.new do |s|
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
   s.rubygems_version = %q{1.3.7}
-  s.summary = %q{Backup and restore your database to amazon S3, encrypting and compressing it on the fly}
+  s.summary = %q{Backup and restore the database of your rails app to amazon S3, encrypting and compressing it on the fly}
   s.test_files = [
     "spec/s3db-backup_spec.rb",
      "spec/spec_helper.rb"
@@ -67,15 +67,18 @@ Gem::Specification.new do |s|
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
       s.add_runtime_dependency(%q<right_aws>, ["~> 2.0.0"])
       s.add_runtime_dependency(%q<progressbar>, [">= 0.9.0"])
+      s.add_runtime_dependency(%q<s3sync>, ["~> 1.2.5"])
       s.add_development_dependency(%q<rspec>, [">= 1.2.9"])
     else
       s.add_dependency(%q<right_aws>, ["~> 2.0.0"])
       s.add_dependency(%q<progressbar>, [">= 0.9.0"])
+      s.add_dependency(%q<s3sync>, ["~> 1.2.5"])
       s.add_dependency(%q<rspec>, [">= 1.2.9"])
     end
   else
     s.add_dependency(%q<right_aws>, ["~> 2.0.0"])
     s.add_dependency(%q<progressbar>, [">= 0.9.0"])
+    s.add_dependency(%q<s3sync>, ["~> 1.2.5"])
     s.add_dependency(%q<rspec>, [">= 1.2.9"])
   end
 end

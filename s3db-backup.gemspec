@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{s3db-backup}
-  s.version = "0.3.3"
+  s.version = "0.3.4"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Matthias Marschall"]
-  s.date = %q{2010-10-22}
+  s.date = %q{2010-10-25}
   s.description = %q{This gem helps you to easily create backups of your database and store them on amazon S3. It uses standard Unix tools to do the heavy lifting like dumping the db (mysqldump), compressing (gzip, tar), and encrypting (ccrypt).}
   s.email = %q{mm@agileweboperations.com}
   s.extra_rdoc_files = [
@@ -35,10 +35,26 @@ Gem::Specification.new do |s|
      "spec/spec_helper.rb"
   ]
   s.homepage = %q{http://github.com/mmarschall/s3db-backup}
+  s.post_install_message = %q{
+    -------------------------------------------------------------------------------
+
+    Please put your Amazon EC2 credentials into:
+
+      $ config/s3_config.yml
+
+    and put a strong, random key into:
+    
+      $ db/secret.txt
+      
+    before running your first backup!
+    
+    -------------------------------------------------------------------------------
+
+}
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
   s.rubygems_version = %q{1.3.7}
-  s.summary = %q{Backup and restore your database to amazon S3, encrypting and compressing it on the way}
+  s.summary = %q{Backup and restore your database to amazon S3, encrypting and compressing it on the fly}
   s.test_files = [
     "spec/s3db-backup_spec.rb",
      "spec/spec_helper.rb"

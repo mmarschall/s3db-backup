@@ -22,5 +22,10 @@ namespace :s3db do
     task :anonymize => :environment do
       S3dbBackup.anonymize
     end
+    
+    desc "synchronize files from shared/system to your Amazon S3 bucket"
+    task :files => :environment do
+      S3dbBackup.sync_shared_system_files
+    end
   end
 end

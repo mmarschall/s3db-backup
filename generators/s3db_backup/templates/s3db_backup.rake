@@ -25,8 +25,8 @@ namespace :s3db do
   end
   
   desc "synchronize files from shared/system to your Amazon S3 bucket"
-  task :sync_shared_system_files => :environment do
-    S3dbBackup.sync_shared_system_files
+  task :sync_public_system_files => :environment do
+    S3dbBackup.sync_public_system_files
   end
   
 end

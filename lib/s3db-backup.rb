@@ -61,11 +61,13 @@ class S3dbBackup
     config = ActiveRecord::Base.configurations[RAILS_ENV || 'development']
     ActiveRecord::Base.connection.recreate_database(config['database'], config)
     puts "** Untarring db/latest_prod_dump.sql.gz"
-    system("cd db && gunzip latest_prod_dump.sql.gz") if File.exist?("db/latest_prod_dump.sql.gz")
-
+    result = system("cd db && gunzip latest_prod_dump.sql.gz") if File.exist?("db/latest_prod_dump.sql.gz")
+    raise "Untarring db/latest_prod_dump.sql.gz failed with exit code: #{result}" unless result == 0
+    
     puts "** Loading dump with mysql into #{config['database']}"
 
-    system("$(which mysql) --user #{config['username']} #{"--password=#{config['password']}" unless config['password'].blank?} --database #{config['database']} < db/latest_prod_dump.sql")
+    result = system("$(which mysql) --user #{config['username']} #{"--password=#{config['password']}" unless config['password'].blank?} --database #{config['database']} < db/latest_prod_dump.sql")
+    raise "Loading dump with mysql into #{config['database']} failed with exit code: #{$?}" unless result == 0
 
     connection_pool = ActiveRecord::Base.establish_connection(RAILS_ENV || 'development')
     anonymize_dump(config, connection_pool.connection)

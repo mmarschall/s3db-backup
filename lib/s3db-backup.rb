@@ -36,7 +36,7 @@ class S3dbBackup
   def self.fetch
     aws = YAML::load_file(File.join(Rails.root, "config", "s3_config.yml"))
     s3 = RightAws::S3Interface.new(aws['aws_access_key_id'], aws['secret_access_key'])
-    bucket = aws['production']['bucket']
+    bucket = ENV['S3_BUCKET'] || aws['production']['bucket']
     all_dump_keys = s3.list_bucket(bucket, {:prefix => "mysql"})
     last_dump_key = all_dump_keys.sort{|a,b| a[:last_modified]<=>b[:last_modified]}.last
     content_length = last_dump_key[:size]

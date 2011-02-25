@@ -3,6 +3,11 @@ require "yaml"
 require "progressbar"
 
 class S3dbBackup
+
+  class << self
+    attr_accessor :rails_env
+  end
+
   def self.backup
     aws = YAML::load_file(File.join(Rails.root, "config", "s3_config.yml"))
     config = ActiveRecord::Base.configurations[RAILS_ENV]
@@ -59,7 +64,10 @@ class S3dbBackup
   end
   
   def self.load
-    config = ActiveRecord::Base.configurations[RAILS_ENV || 'development']
+    database_env = self.rails_env || RAILS_ENV || "development"
+    puts "** using database configuration for environment: '#{database_env}'"
+    config = ActiveRecord::Base.configurations[database_env]
+    puts "** re-creating database #{config['database']}"
     ActiveRecord::Base.connection.recreate_database(config['database'], config)
     puts "** Gunzipping db/latest_prod_dump.sql.gz"
     result = false
@@ -72,7 +80,7 @@ class S3dbBackup
     result = system("$(which mysql) --user #{config['username']} #{"--password=#{config['password']}" unless config['password'].blank?} --database #{config['database']} < db/latest_prod_dump.sql")
     raise "Loading dump with mysql into #{config['database']} failed with exit code: #{$?}" unless result
 
-    connection_pool = ActiveRecord::Base.establish_connection(RAILS_ENV || 'development')
+    connection_pool = ActiveRecord::Base.establish_connection(database_env)
     anonymize_dump(config, connection_pool.connection)
 
     puts "** Successfully loaded and anonymized latest dump into #{config['database']}"

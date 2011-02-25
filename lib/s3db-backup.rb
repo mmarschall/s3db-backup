@@ -36,7 +36,7 @@ class S3dbBackup
   def self.fetch
     aws = YAML::load_file(File.join(Rails.root, "config", "s3_config.yml"))
     s3 = RightAws::S3Interface.new(aws['aws_access_key_id'], aws['secret_access_key'])
-    bucket = ENV['S3_BUCKET'] || aws['production']['bucket']
+    bucket = ENV['S3DB_BUCKET'] || aws['production']['bucket']
     all_dump_keys = s3.list_bucket(bucket, {:prefix => "mysql"})
     last_dump_key = all_dump_keys.sort{|a,b| a[:last_modified]<=>b[:last_modified]}.last
     content_length = last_dump_key[:size]
@@ -54,20 +54,23 @@ class S3dbBackup
     progress.finish
 
     puts "** decrypting dump"
-    `rm -f #{latest_dump_path} && ccrypt -k #{File.join(Rails.root, "db", "secret.txt")} -d #{latest_enc_dump_path}`
+    secret_key_path = ENV['S3DB_SECRET_KEY_PATH'] || File.join(Rails.root, "db", "secret.txt")
+    `rm -f #{latest_dump_path} && ccrypt -k #{secret_key_path} -d #{latest_enc_dump_path}`
   end
   
   def self.load
     config = ActiveRecord::Base.configurations[RAILS_ENV || 'development']
     ActiveRecord::Base.connection.recreate_database(config['database'], config)
-    puts "** Untarring db/latest_prod_dump.sql.gz"
+    puts "** Gunzipping db/latest_prod_dump.sql.gz"
+    result = false
     result = system("cd db && gunzip latest_prod_dump.sql.gz") if File.exist?("db/latest_prod_dump.sql.gz")
-    raise "Untarring db/latest_prod_dump.sql.gz failed with exit code: #{result}" unless result == 0
+    raise "Gunzipping db/latest_prod_dump.sql.gz failed with exit code: #{result}" unless result
     
     puts "** Loading dump with mysql into #{config['database']}"
 
+    result = false
     result = system("$(which mysql) --user #{config['username']} #{"--password=#{config['password']}" unless config['password'].blank?} --database #{config['database']} < db/latest_prod_dump.sql")
-    raise "Loading dump with mysql into #{config['database']} failed with exit code: #{$?}" unless result == 0
+    raise "Loading dump with mysql into #{config['database']} failed with exit code: #{$?}" unless result
 
     connection_pool = ActiveRecord::Base.establish_connection(RAILS_ENV || 'development')
     anonymize_dump(config, connection_pool.connection)

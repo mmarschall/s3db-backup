@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{s3db-backup}
-  s.version = "0.4.7"
+  s.version = "0.4.8"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Matthias Marschall"]
-  s.date = %q{2011-02-01}
+  s.date = %q{2011-02-25}
   s.description = %q{This gem helps you to easily create backups of the database of your rails app and store them on amazon S3. It uses standard Unix tools to do the heavy lifting like dumping the db (mysqldump), compressing (gzip, tar), and encrypting (ccrypt).}
   s.email = %q{mm@agileweboperations.com}
   s.extra_rdoc_files = [

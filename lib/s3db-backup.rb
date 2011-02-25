@@ -63,7 +63,7 @@ class S3dbBackup
     ActiveRecord::Base.connection.recreate_database(config['database'], config)
     puts "** Gunzipping db/latest_prod_dump.sql.gz"
     result = false
-    result = system("cd db && gunzip latest_prod_dump.sql.gz") if File.exist?("db/latest_prod_dump.sql.gz")
+    result = system("cd db && gunzip -f latest_prod_dump.sql.gz") if File.exist?("db/latest_prod_dump.sql.gz")
     raise "Gunzipping db/latest_prod_dump.sql.gz failed with exit code: #{result}" unless result
     
     puts "** Loading dump with mysql into #{config['database']}"

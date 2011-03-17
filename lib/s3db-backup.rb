@@ -104,9 +104,9 @@ class S3dbBackup
   def self.backup_public_system_files
     aws = YAML::load_file(File.join(Rails.root, "config", "s3_config.yml"))
     s3 = RightAws::S3Interface.new(aws['aws_access_key_id'], aws['secret_access_key'])
-    latest_tar_file = "shared_system_#{Time.now.strftime('%d-%m-%Y-%Hh%Mm%Ss')}.tar"
+    latest_tar_file = "public_system_#{Time.now.strftime('%d-%m-%Y-%Hh%Mm%Ss')}.tar"
     shared_system_tar_file_path = Tempfile.new(latest_tar_file).path
-    system("tar cf #{shared_system_tar_file_path} #{File.join(Rails.root, "public", "system")}")
+    system("tar chf #{shared_system_tar_file_path} #{File.join(Rails.root, "public", "system")}")
     s3.put("#{aws[RAILS_ENV]['bucket']}", "#{latest_tar_file}", File.open(shared_system_tar_file_path))
   end
 end

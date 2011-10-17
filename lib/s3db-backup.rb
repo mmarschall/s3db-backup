@@ -10,18 +10,18 @@ class S3dbBackup
 
   def self.backup
     aws = YAML::load_file(File.join(Rails.root, "config", "s3_config.yml"))
-    config = ActiveRecord::Base.configurations[RAILS_ENV]
+    config = ActiveRecord::Base.configurations[::Rails.env]
 
     mysqldump = `which mysqldump`.strip
     raise "Please make sure that 'mysqldump' is installed and in your path!" if mysqldump.empty?
-    
+
     gzip = `which gzip`.strip
     raise "Please make sure that 'gzip' is installed and in your path!" if gzip.empty?
 
     ccrypt = `which ccrypt`.strip
     raise "Please make sure that 'ccrypt' is installed and in your path!" if ccrypt.empty?
-    
-    raise "Please specify a bucket for your #{RAILS_ENV} environment in config/s3config.yml" if aws[RAILS_ENV].nil?
+
+    raise "Please specify a bucket for your #{::Rails.env} environment in config/s3config.yml" if aws[::Rails.env].nil?
 
     latest_dump = "mysql-#{config['database']}-#{Time.now.strftime('%d-%m-%Y-%Hh%Mm%Ss')}.sql.gz"
     mysql_dump_path = Tempfile.new(latest_dump).path
@@ -35,9 +35,9 @@ class S3dbBackup
 
 
     s3 = RightAws::S3Interface.new(aws['aws_access_key_id'], aws['secret_access_key'])
-    s3.put("#{aws[RAILS_ENV]['bucket']}", "#{latest_dump}.cpt", File.open(encrypted_file_path))
+    s3.put("#{aws[::Rails.env]['bucket']}", "#{latest_dump}.cpt", File.open(encrypted_file_path))
   end
-  
+
   def self.fetch
     aws = YAML::load_file(File.join(Rails.root, "config", "s3_config.yml"))
     s3 = RightAws::S3Interface.new(aws['aws_access_key_id'], aws['secret_access_key'])
@@ -62,9 +62,9 @@ class S3dbBackup
     secret_key_path = ENV['S3DB_SECRET_KEY_PATH'] || File.join(Rails.root, "db", "secret.txt")
     `rm -f #{latest_dump_path} && ccrypt -k #{secret_key_path} -d #{latest_enc_dump_path}`
   end
-  
+
   def self.load
-    database_env = self.rails_env || RAILS_ENV || "development"
+    database_env = self.rails_env || ::Rails.env || "development"
     puts "** using database configuration for environment: '#{database_env}'"
     config = ActiveRecord::Base.configurations[database_env]
     puts "** re-creating database #{config['database']}"
@@ -73,7 +73,7 @@ class S3dbBackup
     result = false
     result = system("cd db && gunzip -f latest_prod_dump.sql.gz") if File.exist?("db/latest_prod_dump.sql.gz")
     raise "Gunzipping db/latest_prod_dump.sql.gz failed with exit code: #{result}" unless result
-    
+
     puts "** Loading dump with mysql into #{config['database']}"
 
     result = false
@@ -85,20 +85,20 @@ class S3dbBackup
 
     puts "** Successfully loaded and anonymized latest dump into #{config['database']}"
   end
-  
+
   def self.anonymize
     puts "** Anonymizing all email columns in the database"
-    config = ActiveRecord::Base.configurations[RAILS_ENV || 'development']
-    connection_pool = ActiveRecord::Base.establish_connection(RAILS_ENV || 'development')
+    config = ActiveRecord::Base.configurations[::Rails.env || 'development']
+    connection_pool = ActiveRecord::Base.establish_connection(::Rails.env || 'development')
     anonymize_dump(config, connection_pool.connection)
-  end  
-  
+  end
+
   def self.anonymize_dump(config, connection)
   end
-  
+
   def self.sync_public_system_files
     aws = YAML::load_file(File.join(Rails.root, "config", "s3_config.yml"))
-    system("bash -c 'AWS_ACCESS_KEY_ID=#{aws['aws_access_key_id']} AWS_SECRET_ACCESS_KEY=#{aws['secret_access_key']} AWS_CALLING_FORMAT=SUBDOMAIN $(which s3sync) -s -r #{Rails.root}/public/system #{aws[RAILS_ENV || 'development']['bucket']}:files'")
+    system("bash -c 'AWS_ACCESS_KEY_ID=#{aws['aws_access_key_id']} AWS_SECRET_ACCESS_KEY=#{aws['secret_access_key']} AWS_CALLING_FORMAT=SUBDOMAIN $(which s3sync) -s -r #{Rails.root}/public/system #{aws[::Rails.env || 'development']['bucket']}:files'")
   end
 
   def self.backup_public_system_files
@@ -107,6 +107,6 @@ class S3dbBackup
     latest_tar_file = "public_system_#{Time.now.strftime('%d-%m-%Y-%Hh%Mm%Ss')}.tar"
     shared_system_tar_file_path = Tempfile.new(latest_tar_file).path
     system("tar chf #{shared_system_tar_file_path} #{File.join(Rails.root, "public", "system")}")
-    s3.put("#{aws[RAILS_ENV]['bucket']}", "#{latest_tar_file}", File.open(shared_system_tar_file_path))
+    s3.put("#{aws[::Rails.env]['bucket']}", "#{latest_tar_file}", File.open(shared_system_tar_file_path))
   end
 end

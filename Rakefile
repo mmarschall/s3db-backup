@@ -10,7 +10,7 @@ begin
     gem.email = "mm@agileweboperations.com"
     gem.homepage = "http://github.com/mmarschall/s3db-backup"
     gem.authors = ["Matthias Marschall"]
-    gem.add_dependency "right_aws", "~> 2.0.0"
+    gem.add_dependency "right_aws", ">= 2.0.0"
     gem.add_dependency "progressbar", ">= 0.9.0"
     gem.add_dependency "s3sync", "~> 1.2.5"
     gem.add_development_dependency "rspec", ">= 1.2.9"

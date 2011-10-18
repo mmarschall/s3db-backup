@@ -77,7 +77,7 @@ class S3dbBackup
     puts "** Loading dump with mysql into #{config['database']}"
 
     result = false
-    result = system("$(which mysql) --user #{config['username']} #{"--password=#{config['password']}" unless config['password'].blank?} --database #{config['database']} < db/latest_prod_dump.sql")
+    result = system("$(which mysql) --user #{config['username']} #{"--password=#{config['password']}" unless config['password'].blank?} --database #{config['database']} #{"--host #{config['host']}" unless config['host'].blank?} < db/latest_prod_dump.sql")
     raise "Loading dump with mysql into #{config['database']} failed with exit code: #{$?}" unless result
 
     connection_pool = ActiveRecord::Base.establish_connection(database_env)

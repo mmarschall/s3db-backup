@@ -1,11 +1,13 @@
 require "right_aws"
 require "yaml"
-require "progressbar"
 
 class S3dbBackup
 
   class << self
     attr_accessor :rails_env
+    attr_accessor :version
+    @version = File.open(File.expand_path(File.dirname(__FILE__)) + "/../VERSION", "r").read
+    puts "** s3db-backup version #{@version}"
   end
 
   def self.backup
@@ -44,19 +46,15 @@ class S3dbBackup
     bucket = ENV['S3DB_BUCKET'] || aws['production']['bucket']
     all_dump_keys = s3.list_bucket(bucket, {:prefix => "mysql"})
     last_dump_key = all_dump_keys.sort{|a,b| a[:last_modified]<=>b[:last_modified]}.last
-    content_length = last_dump_key[:size]
     puts "** Getting #{last_dump_key[:key]} from #{bucket}"
-    progress = ProgressBar.new("** s3 get", content_length)
 
     latest_dump_path = File.join(Rails.root, "db", "latest_prod_dump.sql.gz")
     latest_enc_dump_path = "#{latest_dump_path}.cpt"
     File.open(latest_enc_dump_path, "w+") do |f|
       s3.retrieve_object(:bucket => bucket, :key => last_dump_key[:key]) do |chunk|
-        progress.inc(chunk.length)
         f.write(chunk)
       end
     end
-    progress.finish
 
     puts "** decrypting dump"
     secret_key_path = ENV['S3DB_SECRET_KEY_PATH'] || File.join(Rails.root, "db", "secret.txt")
@@ -77,7 +75,8 @@ class S3dbBackup
     puts "** Loading dump with mysql into #{config['database']}"
 
     result = false
-    result = system("$(which mysql) --user #{config['username']} #{"--password=#{config['password']}" unless config['password'].blank?} --database #{config['database']} #{"--host #{config['host']}" unless config['host'].blank?} < db/latest_prod_dump.sql")
+    cmd = "$(which mysql) --user #{config['username']} #{"--password=#{config['password']}" unless config['password'].blank?} --database #{config['database']} #{"--host=#{config['host']}" unless config['host'].blank?} #{"--port=#{config['port']}" unless config['port'].blank?} < db/latest_prod_dump.sql"
+    result = system(cmd)
     raise "Loading dump with mysql into #{config['database']} failed with exit code: #{$?}" unless result
 
     connection_pool = ActiveRecord::Base.establish_connection(database_env)
@@ -94,19 +93,5 @@ class S3dbBackup
   end
 
   def self.anonymize_dump(config, connection)
-  end
-
-  def self.sync_public_system_files
-    aws = YAML::load_file(File.join(Rails.root, "config", "s3_config.yml"))
-    system("bash -c 'AWS_ACCESS_KEY_ID=#{aws['aws_access_key_id']} AWS_SECRET_ACCESS_KEY=#{aws['secret_access_key']} AWS_CALLING_FORMAT=SUBDOMAIN $(which s3sync) -s -r #{Rails.root}/public/system #{aws[::Rails.env || 'development']['bucket']}:files'")
-  end
-
-  def self.backup_public_system_files
-    aws = YAML::load_file(File.join(Rails.root, "config", "s3_config.yml"))
-    s3 = RightAws::S3Interface.new(aws['aws_access_key_id'], aws['secret_access_key'])
-    latest_tar_file = "public_system_#{Time.now.strftime('%d-%m-%Y-%Hh%Mm%Ss')}.tar"
-    shared_system_tar_file_path = Tempfile.new(latest_tar_file).path
-    system("tar chf #{shared_system_tar_file_path} #{File.join(Rails.root, "public", "system")}")
-    s3.put("#{aws[::Rails.env]['bucket']}", "#{latest_tar_file}", File.open(shared_system_tar_file_path))
   end
 end

@@ -79,13 +79,13 @@ class S3dbBackup
     raise "Loading dump with mysql into #{config['database']} failed with exit code: #{$?}" unless result
 
     connection_pool = ActiveRecord::Base.establish_connection(database_env)
-    anonymize_dump(config, connection_pool.connection)
+    anonymize_dump(config, connection_pool.connection) unless ::Rails.env == 'production'
 
     puts "** Successfully loaded and anonymized latest dump into #{config['database']}"
   end
 
   def self.anonymize
-    puts "** Anonymizing all email columns in the database"
+    puts "** Anonymizing database"
     config = ActiveRecord::Base.configurations[::Rails.env || 'development']
     connection_pool = ActiveRecord::Base.establish_connection(::Rails.env || 'development')
     anonymize_dump(config, connection_pool.connection)

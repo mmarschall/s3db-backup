@@ -7,6 +7,7 @@ class S3dbBackup
     attr_accessor :rails_env
     attr_accessor :version
     @version = File.open(File.expand_path(File.dirname(__FILE__)) + "/../VERSION", "r").read
+    puts "s3db-backup Version #{@version}" if ::Rails.env == "development"
   end
 
   def self.backup

@@ -25,7 +25,7 @@ class S3dbBackup
 
     raise "Please specify a bucket for your #{::Rails.env} environment in config/s3config.yml" if aws[::Rails.env].nil?
 
-    latest_dump = "mysql-#{config['database']}-#{Time.now.strftime('%d-%m-%Y-%Hh%Mm%Ss')}.sql.gz"
+    latest_dump = "mysql-#{config['database']}-#{Time.now.strftime('%Y-%m-%d-%Hh%Mm%Ss')}.sql.gz"
     mysql_dump_path = Tempfile.new(latest_dump).path
 
 

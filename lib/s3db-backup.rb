@@ -50,7 +50,7 @@ class S3dbBackup
 
     latest_dump_path = File.join(Rails.root, "db", "latest_prod_dump.sql.gz")
     latest_enc_dump_path = "#{latest_dump_path}.cpt"
-    File.open(latest_enc_dump_path, "w+") do |f|
+    File.open(latest_enc_dump_path, "w+b") do |f|
       s3.retrieve_object(:bucket => bucket, :key => last_dump_key[:key]) do |chunk|
         f.write(chunk)
       end

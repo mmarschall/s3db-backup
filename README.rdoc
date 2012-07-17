@@ -46,6 +46,16 @@ This will generate the following files: <tt>config/s3_config.yml</tt>, <tt>db/se
 * Put a long and random string as your encryption/decryption key for <tt>ccrypt</tt> into <tt>db/secret.txt</tt>
 
 	$ echo "my secret key" > db/secret.txt
+
+== Upgrading from s3db-backup < 0.7
+
+Edit your existing <tt>lib/tasks/s3db_backup.rake</tt> file and replace
+
+    S3dbbackup
+
+with
+
+    S3db:Backup
 	
 == Running a Backup
 	

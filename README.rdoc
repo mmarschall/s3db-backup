@@ -22,11 +22,11 @@ And, of course, you'll need to sign up for an Amazon S3 account and create a buc
 
 * Install the <em>s3db-backup</em> gem
 
-	sudo gem install s3db-backup
+    sudo gem install s3db-backup
 	
 * Run the <em>s3db_backup</em> generator to generate the necessary config files and rake tasks
 
-	$ script/generate s3db_backup
+    $ script/generate s3db_backup
 	
 This will generate the following files: <tt>config/s3_config.yml</tt>, <tt>db/secret.txt</tt>, and <tt>lib/tasks/db.rake</tt>
 
@@ -47,16 +47,6 @@ This will generate the following files: <tt>config/s3_config.yml</tt>, <tt>db/se
 
 	$ echo "my secret key" > db/secret.txt
 
-== Upgrading from s3db-backup < 0.7
-
-Edit your existing <tt>lib/tasks/s3db_backup.rake</tt> file and replace
-
-    S3dbbackup
-
-with
-
-    S3db:Backup
-	
 == Running a Backup
 	
 Dumping, encrypting, and uploading your current database is now as easy as typing one command:

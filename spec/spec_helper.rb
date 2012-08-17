@@ -1,9 +1,3 @@
 $LOAD_PATH.unshift(File.dirname(__FILE__))
-$LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
-require 's3db-backup'
-require 'spec'
-require 'spec/autorun'
-
-Spec::Runner.configure do |config|
-  
-end
+$LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib', 's3db'))
+require 'lib/s3db/backup'

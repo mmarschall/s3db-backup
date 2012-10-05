@@ -3,6 +3,8 @@ require "yaml"
 
 class S3dbBackup
 
+  VERSION = "0.7.1"
+
   class << self
     attr_accessor :rails_env
   end
@@ -23,12 +25,14 @@ class S3dbBackup
     raise "Please specify a bucket for your #{::Rails.env} environment in config/s3config.yml" if aws[::Rails.env].nil?
 
     latest_dump = "mysql-#{config['database']}-#{Time.now.strftime('%Y-%m-%d-%Hh%Mm%Ss')}.sql.gz"
-    mysql_dump_path = Tempfile.new(latest_dump).path
+    mysql_dump = Tempfile.new(latest_dump)
+    mysql_dump_path = mysql_dump.path
 
 
     system("#{mysqldump} --user=#{config['username']} --password=#{config['password']} #{config['host'] ? "-h #{config['host']}" : ''} #{config['database']} | #{gzip} -9 > #{mysql_dump_path}")
 
-    encrypted_file_path = Tempfile.new("ccrypt_tempfile").path
+    encrypted_file = Tempfile.new("ccrypt_tempfile")
+    encrypted_file_path = encrypted_file.path
     ccrypt_command = "cat #{mysql_dump_path} | #{ccrypt} -k #{File.join(Rails.root, "db", "secret.txt")} -e > #{encrypted_file_path}"
     `#{ccrypt_command}`
 

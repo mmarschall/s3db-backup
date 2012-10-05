@@ -1,8 +1,10 @@
 # -*- encoding: utf-8 -*-
+$:.push File.expand_path("../lib", __FILE__)
+require 's3db-backup'
 
 Gem::Specification.new do |s|
   s.name        = "s3db-backup"
-  s.version     = File.read('VERSION')
+  s.version     = S3dbBackup::VERSION
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["Matthias Marschall"]
   s.email       = ["mm@agileweboperations.com"]
@@ -13,7 +15,7 @@ Gem::Specification.new do |s|
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
-  s.require_paths = ["lib", "lib/s3db"]
+  s.require_paths = ["lib"]
 
   s.add_runtime_dependency 'right_aws', '>= 2.0.0'
   s.add_development_dependency 'rspec', '>= 1.2.9'

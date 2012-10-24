@@ -16,8 +16,7 @@ class S3dbBackup
   def self.dump_database
     config = configure_rails()
     encrypted_file = Tempfile.new("ccrypt_tempfile")
-    command = "#{mysqldump_command()} --user=#{config['username']} --password=#{config['password']} #{config['host'] ? "-h #{config['host']}" : ''} #{config['database']} | #{gzip_command()} -9 | #{ccrypt_command()} -k #{File.join(Rails.root, "db", "secret.txt")} -e > #{encrypted_file.path}"
-    system(command)
+    system(command(config, encrypted_file))
     return encrypted_file
   end
 
@@ -29,22 +28,30 @@ class S3dbBackup
     s3.put("#{aws[::Rails.env]['bucket']}", "#{mysql_dump_file_name}", encrypted_file.open)
   end
 
-  def self.ccrypt_command
+  def self.command(config, encrypted_file)
+    command_chain = []
+    command_chain << mysqldump_command(config)
+    command_chain << gzip_command()
+    command_chain << ccrypt_command(encrypted_file)
+    command_chain.join(" | ")
+  end
+
+  def self.ccrypt_command(encrypted_file)
     ccrypt = `which ccrypt`.strip
     raise "Please make sure that 'ccrypt' is installed and in your path!" if ccrypt.empty?
-    ccrypt
+    "#{ccrypt} -k #{File.join(Rails.root, "db", "secret.txt")} -e > #{encrypted_file.path}"
   end
 
   def self.gzip_command
     gzip = `which gzip`.strip
     raise "Please make sure that 'gzip' is installed and in your path!" if gzip.empty?
-    gzip
+    "#{gzip} -9"
   end
 
-  def self.mysqldump_command
+  def self.mysqldump_command(config)
     mysqldump = `which mysqldump`.strip
     raise "Please make sure that 'mysqldump' is installed and in your path!" if mysqldump.empty?
-    mysqldump
+    "#{mysqldump} --user=#{config['username']} --password=#{config['password']} #{config['host'] ? "-h #{config['host']} " : ''}#{config['database']}"
   end
 
   def self.configure_rails

@@ -4,7 +4,7 @@ require 'version'
 
 Gem::Specification.new do |s|
   s.name        = "s3db-backup"
-  s.version     = S3dbBackup::VERSION
+  s.version     = S3db::VERSION
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["Matthias Marschall"]
   s.email       = ["mm@agileweboperations.com"]

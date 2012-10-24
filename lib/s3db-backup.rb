@@ -1,5 +1,6 @@
 require "right_aws"
 require "yaml"
+require "tempfile"
 
 class S3dbBackup
 

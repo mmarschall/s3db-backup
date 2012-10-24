@@ -19,5 +19,4 @@ Gem::Specification.new do |s|
 
   s.add_runtime_dependency 'right_aws', '>= 2.0.0'
   s.add_development_dependency 'rspec', '>= 1.2.9'
-  s.add_development_dependency 'rails', '~> 2.3'
 end

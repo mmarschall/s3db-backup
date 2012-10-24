@@ -10,35 +10,65 @@ class S3dbBackup
   end
 
   def self.backup
-    aws = YAML::load_file(File.join(Rails.root, "config", "s3_config.yml"))
-    config = ActiveRecord::Base.configurations[::Rails.env]
+    mysql_dump_file_name, mysql_dump_tempfile_path = dump_database()
+    encrypted_file_path = encrypt_database_dump(mysql_dump_tempfile_path)
+    upload_encrypted_database_dump(encrypted_file_path, mysql_dump_file_name)
+  end
 
-    mysqldump = `which mysqldump`.strip
-    raise "Please make sure that 'mysqldump' is installed and in your path!" if mysqldump.empty?
+  def self.dump_database
+    config = configure_rails()
+    mysql_dump_file_name = "mysql-#{config['database']}-#{Time.now.strftime('%Y-%m-%d-%Hh%Mm%Ss')}.sql.gz"
+    mysql_dump_tempfile = Tempfile.new(mysql_dump_file_name)
+    mysql_dump_tempfile_path = mysql_dump_tempfile.path
+    system("#{mysqldump_command()} --user=#{config['username']} --password=#{config['password']} #{config['host'] ? "-h #{config['host']}" : ''} #{config['database']} | #{gzip_command()} -9 > #{mysql_dump_path}")
+    return mysql_dump_file_name, mysql_dump_tempfile_path
+  end
 
-    gzip = `which gzip`.strip
-    raise "Please make sure that 'gzip' is installed and in your path!" if gzip.empty?
+  def self.upload_encrypted_database_dump(encrypted_file_path, mysql_dump_file_name)
+    aws = configure_aws()
+    s3 = RightAws::S3Interface.new(aws['aws_access_key_id'], aws['secret_access_key'])
+    s3.put("#{aws[::Rails.env]['bucket']}", "#{mysql_dump_file_name}.cpt", File.open(encrypted_file_path))
+  end
 
-    ccrypt = `which ccrypt`.strip
-    raise "Please make sure that 'ccrypt' is installed and in your path!" if ccrypt.empty?
-
-    raise "Please specify a bucket for your #{::Rails.env} environment in config/s3config.yml" if aws[::Rails.env].nil?
-
-    latest_dump = "mysql-#{config['database']}-#{Time.now.strftime('%Y-%m-%d-%Hh%Mm%Ss')}.sql.gz"
-    mysql_dump = Tempfile.new(latest_dump)
-    mysql_dump_path = mysql_dump.path
-
-
-    system("#{mysqldump} --user=#{config['username']} --password=#{config['password']} #{config['host'] ? "-h #{config['host']}" : ''} #{config['database']} | #{gzip} -9 > #{mysql_dump_path}")
-
+  def self.encrypt_database_dump(mysql_dump_tempfile_path)
     encrypted_file = Tempfile.new("ccrypt_tempfile")
     encrypted_file_path = encrypted_file.path
-    ccrypt_command = "cat #{mysql_dump_path} | #{ccrypt} -k #{File.join(Rails.root, "db", "secret.txt")} -e > #{encrypted_file_path}"
+    ccrypt_command = "cat #{mysql_dump_tempfile_path} | #{ccrypt_command()} -k #{File.join(Rails.root, "db", "secret.txt")} -e > #{encrypted_file_path}"
     `#{ccrypt_command}`
+    encrypted_file_path
+  end
 
 
-    s3 = RightAws::S3Interface.new(aws['aws_access_key_id'], aws['secret_access_key'])
-    s3.put("#{aws[::Rails.env]['bucket']}", "#{latest_dump}.cpt", File.open(encrypted_file_path))
+  def self.ccrypt_command
+    ccrypt = `which ccrypt`.strip
+    raise "Please make sure that 'ccrypt' is installed and in your path!" if ccrypt.empty?
+    ccrypt
+  end
+
+  def self.gzip_command
+    gzip = `which gzip`.strip
+    raise "Please make sure that 'gzip' is installed and in your path!" if gzip.empty?
+    gzip
+  end
+
+  def self.mysqldump_command
+    mysqldump = `which mysqldump`.strip
+    raise "Please make sure that 'mysqldump' is installed and in your path!" if mysqldump.empty?
+    mysqldump
+  end
+
+  def self.configure_rails
+    ActiveRecord::Base.configurations[::Rails.env]
+  end
+
+  def self.configure_aws
+    aws = YAML::load_file(File.join(Rails.root, "config", "s3_config.yml"))
+    ensure_bucket_name_found(aws)
+    return aws
+  end
+
+  def self.ensure_bucket_name_found(aws)
+    raise "Please specify a bucket for your #{::Rails.env} environment in config/s3config.yml" if aws[::Rails.env].nil?
   end
 
   def self.fetch

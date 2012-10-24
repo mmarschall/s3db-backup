@@ -3,41 +3,30 @@ require "yaml"
 
 class S3dbBackup
 
-  VERSION = "0.7.1"
+  VERSION = "0.8"
 
   class << self
     attr_accessor :rails_env
   end
 
   def self.backup
-    mysql_dump_file_name, mysql_dump_tempfile_path = dump_database()
-    encrypted_file_path = encrypt_database_dump(mysql_dump_tempfile_path)
-    upload_encrypted_database_dump(encrypted_file_path, mysql_dump_file_name)
+    encrypted_file = dump_database()
+    upload_encrypted_database_dump(encrypted_file)
   end
 
   def self.dump_database
     config = configure_rails()
-    mysql_dump_file_name = "mysql-#{config['database']}-#{Time.now.strftime('%Y-%m-%d-%Hh%Mm%Ss')}.sql.gz"
-    mysql_dump_tempfile = Tempfile.new(mysql_dump_file_name)
-    mysql_dump_tempfile_path = mysql_dump_tempfile.path
-    system("#{mysqldump_command()} --user=#{config['username']} --password=#{config['password']} #{config['host'] ? "-h #{config['host']}" : ''} #{config['database']} | #{gzip_command()} -9 > #{mysql_dump_path}")
-    return mysql_dump_file_name, mysql_dump_tempfile_path
-  end
-
-  def self.upload_encrypted_database_dump(encrypted_file_path, mysql_dump_file_name)
-    aws = configure_aws()
-    s3 = RightAws::S3Interface.new(aws['aws_access_key_id'], aws['secret_access_key'])
-    s3.put("#{aws[::Rails.env]['bucket']}", "#{mysql_dump_file_name}.cpt", File.open(encrypted_file_path))
-  end
-
-  def self.encrypt_database_dump(mysql_dump_tempfile_path)
     encrypted_file = Tempfile.new("ccrypt_tempfile")
-    encrypted_file_path = encrypted_file.path
-    ccrypt_command = "cat #{mysql_dump_tempfile_path} | #{ccrypt_command()} -k #{File.join(Rails.root, "db", "secret.txt")} -e > #{encrypted_file_path}"
-    `#{ccrypt_command}`
-    encrypted_file_path
+    system("#{mysqldump_command()} --user=#{config['username']} --password=#{config['password']} #{config['host'] ? "-h #{config['host']}" : ''} #{config['database']} | #{gzip_command()} -9 | #{ccrypt_command()} -k #{File.join(Rails.root, "db", "secret.txt")} -e > #{encrypted_file.path}")
+    return encrypted_file
   end
 
+  def self.upload_encrypted_database_dump(encrypted_file)
+    aws = configure_aws()
+    mysql_dump_file_name = "mysql-#{config['database']}-#{Time.now.strftime('%Y-%m-%d-%Hh%Mm%Ss')}.sql.gz.cpt"
+    s3 = RightAws::S3Interface.new(aws['aws_access_key_id'], aws['secret_access_key'])
+    s3.put("#{aws[::Rails.env]['bucket']}", "#{mysql_dump_file_name}", encrypted_file.open)
+  end
 
   def self.ccrypt_command
     ccrypt = `which ccrypt`.strip

@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 $:.push File.expand_path("../lib", __FILE__)
-require 's3db-backup'
+require 'version'
 
 Gem::Specification.new do |s|
   s.name        = "s3db-backup"

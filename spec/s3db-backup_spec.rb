@@ -9,7 +9,7 @@ describe "S3dbBackup" do
   end
   describe "backup" do
     it "runs the command to dump, compress, and encrypt the db" do
-      S3dbBackup.should_receive(:system).with(/mysqldump/)
+      S3dbBackup.should_receive(:system).with(/mysqldump --user/)
       S3dbBackup.backup
     end
     it "uploads encrypted and compressed database dump to given S3 bucket" do

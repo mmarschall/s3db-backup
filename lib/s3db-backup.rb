@@ -1,71 +1,22 @@
 require "right_aws"
 require "yaml"
 require "tempfile"
+require "s3db/backup"
 
-module S3dbBackup
+class S3dbBackup
 
+  #@TODO not needed (I guess)
   class << self
     attr_accessor :rails_env
   end
 
+  def self.backup_instance
+    S3db::Backup.new
+  end
+
+  # this class method is needed for backward compatibility <= 0.6.4
   def self.backup
-    encrypted_file = dump_database()
-    upload_encrypted_database_dump(encrypted_file)
-  end
-
-  def self.dump_database
-    config = configure_rails()
-    encrypted_file = Tempfile.new("ccrypt_tempfile")
-    system(command(config, encrypted_file))
-    return encrypted_file
-  end
-
-  def self.upload_encrypted_database_dump(encrypted_file)
-    aws = configure_aws()
-    config = configure_rails()
-    mysql_dump_file_name = "mysql-#{config['database']}-#{Time.now.strftime('%Y-%m-%d-%Hh%Mm%Ss')}.sql.gz.cpt"
-    s3 = RightAws::S3Interface.new(aws['aws_access_key_id'], aws['secret_access_key'])
-    s3.put("#{aws[::Rails.env]['bucket']}", "#{mysql_dump_file_name}", encrypted_file.open)
-  end
-
-  def self.command(config, encrypted_file)
-    command_chain = []
-    command_chain << mysqldump_command(config)
-    command_chain << gzip_command()
-    command_chain << ccrypt_command(encrypted_file)
-    command_chain.join(" | ")
-  end
-
-  def self.ccrypt_command(encrypted_file)
-    ccrypt = `which ccrypt`.strip
-    raise "Please make sure that 'ccrypt' is installed and in your path!" if ccrypt.empty?
-    "#{ccrypt} -k #{secret_encryption_key_path} -e > #{encrypted_file.path}"
-  end
-
-  def self.gzip_command
-    gzip = `which gzip`.strip
-    raise "Please make sure that 'gzip' is installed and in your path!" if gzip.empty?
-    "#{gzip} -9"
-  end
-
-  def self.mysqldump_command(config)
-    mysqldump = `which mysqldump`.strip
-    raise "Please make sure that 'mysqldump' is installed and in your path!" if mysqldump.empty?
-    "#{mysqldump} --user=#{config['username']} --password=#{config['password']} #{config['host'] ? "-h #{config['host']} " : ''}#{config['database']}"
-  end
-
-  def self.configure_rails
-    ActiveRecord::Base.configurations[::Rails.env]
-  end
-
-  def self.configure_aws
-    aws = YAML::load_file(File.join(Rails.root, "config", "s3_config.yml"))
-    ensure_bucket_name_found(aws)
-    return aws
-  end
-
-  def self.ensure_bucket_name_found(aws)
-    raise "Please specify a bucket for your #{::Rails.env} environment in config/s3config.yml" if aws[::Rails.env].nil?
+    backup_instance.backup
   end
 
   def self.fetch

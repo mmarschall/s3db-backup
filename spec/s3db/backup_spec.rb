@@ -12,6 +12,13 @@ describe S3db::Backup do
     File.stub(:exists?).with("./db/secret.txt").and_return(true)
   end
 
+  describe "initialize" do
+    it "instantiates a configuration instance" do
+      S3db::Configuration.should_receive(:new)
+      S3db::Backup.new
+    end
+  end
+
   describe "backup" do
     it "includes mysqldump into the command to run" do
       backup.should_receive(:system).with(/mysqldump --user=app --password=secret s3db_backup_test/)

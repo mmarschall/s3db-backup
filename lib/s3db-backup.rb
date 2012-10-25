@@ -2,7 +2,7 @@ require "right_aws"
 require "yaml"
 require "tempfile"
 
-class S3dbBackup
+module S3dbBackup
 
   class << self
     attr_accessor :rails_env
@@ -39,7 +39,7 @@ class S3dbBackup
   def self.ccrypt_command(encrypted_file)
     ccrypt = `which ccrypt`.strip
     raise "Please make sure that 'ccrypt' is installed and in your path!" if ccrypt.empty?
-    "#{ccrypt} -k #{File.join(Rails.root, "db", "secret.txt")} -e > #{encrypted_file.path}"
+    "#{ccrypt} -k #{secret_encryption_key_path} -e > #{encrypted_file.path}"
   end
 
   def self.gzip_command
@@ -85,8 +85,13 @@ class S3dbBackup
     end
 
     puts "** decrypting dump"
+    `rm -f #{latest_dump_path} && ccrypt -k #{secret_encryption_key_path} -d #{latest_enc_dump_path}`
+  end
+
+  def self.secret_encryption_key_path
     secret_key_path = ENV['S3DB_SECRET_KEY_PATH'] || File.join(Rails.root, "db", "secret.txt")
-    `rm -f #{latest_dump_path} && ccrypt -k #{secret_key_path} -d #{latest_enc_dump_path}`
+    raise "Please make sure you put your secret encryption key into: '#{secret_key_path}'" unless File.exists?(secret_key_path)
+    secret_key_path
   end
 
   def self.load

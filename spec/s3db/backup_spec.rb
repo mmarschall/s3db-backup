@@ -12,9 +12,23 @@ describe S3db::Backup do
     File.stub(:exists?).with("./db/secret.txt").and_return(true)
   end
 
+  describe "attributes" do
+    it "has reader for config" do
+       backup.config.should be_a(S3db::Configuration)
+    end
+    it "has reader for encrypted_file" do
+       backup.encrypted_file.should be_a(Tempfile)
+    end
+  end
+
   describe "initialize" do
     it "instantiates a configuration instance" do
       S3db::Configuration.should_receive(:new)
+      S3db::Backup.new
+    end
+
+    it "creates a Tempfile for the dump" do
+      Tempfile.should_receive(:new)
       S3db::Backup.new
     end
   end

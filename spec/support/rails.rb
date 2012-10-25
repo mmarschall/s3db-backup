@@ -9,7 +9,11 @@ end
 def stub_rails
   Rails.stub(:root => ".")
   Rails.stub(:env => 'test')
-  ActiveRecord::Base.stub(:configurations => {
+  ActiveRecord::Base.stub(:configurations => rails_configurations)
+end
+
+def rails_configurations
+  {
       'test' => {
           "username" => "app",
           "encoding" => "utf8",
@@ -17,5 +21,5 @@ def stub_rails
           "password" => "secret",
           "adapter" => "mysql2"
       }
-  })
+  }
 end

@@ -6,6 +6,7 @@ describe "S3dbBackup" do
     stub_s3_config_yml()
     stub_right_aws()
     S3dbBackup.stub(:system)
+    File.stub(:exists?).with("./db/secret.txt").and_return(true)
   end
 
   describe "backup" do

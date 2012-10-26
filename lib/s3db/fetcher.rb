@@ -32,6 +32,12 @@ module S3db
       ENV['S3DB_BUCKET'] || config.aws['production']['bucket']
     end
 
+    def find_latest_dump(bucket)
+      all_dump_keys = s3.list_bucket(bucket, {:prefix => "mysql"})
+      raise "No file with prefix 'mysql' found in bucket '#{bucket}'" if all_dump_keys.nil?
+      all_dump_keys.sort { |a, b| a[:last_modified]<=>b[:last_modified] }.last
+    end
+
     def retrieve_latest_dump
       bucket = choose_bucket
       last_dump_key = find_latest_dump(bucket)
@@ -43,21 +49,15 @@ module S3db
       end
     end
 
-    def find_latest_dump(bucket)
-      all_dump_keys = s3.list_bucket(bucket, {:prefix => "mysql"})
-      raise "No file with prefix 'mysql' found in bucket '#{bucket}'" if all_dump_keys.nil?
-      all_dump_keys.sort { |a, b| a[:last_modified]<=>b[:last_modified] }.last
-    end
-
     def decrypt
       puts "** decrypting dump"
       system("rm -f #{latest_dump_path} && ccrypt -k #{S3db::EncryptionKey.path} -d #{latest_dump_path}.cpt")
     end
 
     def decompress
+      raise "#{latest_dump_path} not found" unless File.exists?(latest_dump_path)
       puts "** Gunzipping #{latest_dump_path}"
-      result = false
-      result = system("cd db && gunzip -f #{latest_dump_path}") if File.exist?(latest_dump_path)
+      result = system("cd db && gunzip -f #{latest_dump_path}")
       raise "Gunzipping '#{latest_dump_path}' failed with exit code: #{result}" unless result
     end
   end

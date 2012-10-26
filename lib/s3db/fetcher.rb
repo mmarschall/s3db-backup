@@ -3,34 +3,38 @@ require "s3db/encryption_key"
 module S3db
   class Fetcher
 
+    attr_reader :config, :s3
+
+    def initialize
+      @config = configure()
+      @s3 = RightAws::S3Interface.new(config.aws['aws_access_key_id'], config.aws['secret_access_key'])
+    end
+
     def fetch
-      aws, s3 = configure()
-      bucket = choose_bucket(aws)
-      last_dump_key = find_latest_dump(bucket, s3)
-      latest_dump_path, latest_enc_dump_path = retrieve_latest_dump(bucket, last_dump_key, s3)
+      bucket = choose_bucket
+      last_dump_key = find_latest_dump(bucket)
+      latest_dump_path, latest_enc_dump_path = retrieve_latest_dump(bucket, last_dump_key)
       decrypt(latest_dump_path, latest_enc_dump_path)
       decompress(latest_dump_path)
     end
 
     private
 
-    def choose_bucket(aws)
-      ENV['S3DB_BUCKET'] || aws['production']['bucket']
-    end
-
     def configure
-      aws = YAML::load_file(File.join(Rails.root, "config", "s3_config.yml"))
-      s3 = RightAws::S3Interface.new(aws['aws_access_key_id'], aws['secret_access_key'])
-      return aws, s3
+      S3db::Configuration.new
     end
 
-    def find_latest_dump(bucket, s3)
+    def choose_bucket
+      ENV['S3DB_BUCKET'] || config.aws['production']['bucket']
+    end
+
+    def find_latest_dump(bucket)
       all_dump_keys = s3.list_bucket(bucket, {:prefix => "mysql"})
       #@TODO deal with empty list
       all_dump_keys.sort { |a, b| a[:last_modified]<=>b[:last_modified] }.last
     end
 
-    def retrieve_latest_dump(bucket, last_dump_key, s3)
+    def retrieve_latest_dump(bucket, last_dump_key)
       puts "** Getting #{last_dump_key[:key]} from #{bucket}"
       latest_dump_path = File.join(Rails.root, "db", "latest_prod_dump.sql.gz")
       latest_enc_dump_path = "#{latest_dump_path}.cpt"

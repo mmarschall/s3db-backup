@@ -13,7 +13,6 @@ describe S3db::EncryptionKey do
   end
 
   describe "S3DB_SECRET_KEY_PATH env variable is set" do
-
     before do
       ENV['S3DB_SECRET_KEY_PATH'] = "my/path"
       File.stub(:exists?).with("my/path").and_return(true)
@@ -29,7 +28,6 @@ describe S3db::EncryptionKey do
   end
 
   describe "file does not exist" do
-
     before do
       File.stub(:exists?).with("./db/secret.txt").and_return(false)
     end

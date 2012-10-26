@@ -8,11 +8,11 @@ module S3db
 
     def initialize
       @config = configure()
-      @s3 = RightAws::S3Interface.new(config.aws['aws_access_key_id'], config.aws['secret_access_key'])
       @latest_dump_path = File.join(Rails.root, "db", "latest_prod_dump.sql.gz")
     end
 
     def fetch
+      open_s3_connection
       retrieve_latest_dump
       decrypt
       decompress
@@ -22,6 +22,10 @@ module S3db
 
     def configure
       S3db::Configuration.new
+    end
+
+    def open_s3_connection
+      @s3 = RightAws::S3Interface.new(config.aws['aws_access_key_id'], config.aws['secret_access_key'])
     end
 
     def choose_bucket
@@ -41,13 +45,13 @@ module S3db
 
     def find_latest_dump(bucket)
       all_dump_keys = s3.list_bucket(bucket, {:prefix => "mysql"})
-      #@TODO deal with empty list
+      raise "No file with prefix 'mysql' found in bucket '#{bucket}'" if all_dump_keys.nil?
       all_dump_keys.sort { |a, b| a[:last_modified]<=>b[:last_modified] }.last
     end
 
     def decrypt
       puts "** decrypting dump"
-      `rm -f #{latest_dump_path} && ccrypt -k #{S3db::EncryptionKey.path} -d #{latest_dump_path}.cpt`
+      system("rm -f #{latest_dump_path} && ccrypt -k #{S3db::EncryptionKey.path} -d #{latest_dump_path}.cpt")
     end
 
     def decompress

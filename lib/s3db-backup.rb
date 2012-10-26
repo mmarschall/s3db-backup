@@ -24,6 +24,7 @@ class S3dbBackup
     s3 = RightAws::S3Interface.new(aws['aws_access_key_id'], aws['secret_access_key'])
     bucket = ENV['S3DB_BUCKET'] || aws['production']['bucket']
     all_dump_keys = s3.list_bucket(bucket, {:prefix => "mysql"})
+    #@TODO deal with empty list
     last_dump_key = all_dump_keys.sort { |a, b| a[:last_modified]<=>b[:last_modified] }.last
     puts "** Getting #{last_dump_key[:key]} from #{bucket}"
 
@@ -37,6 +38,11 @@ class S3dbBackup
 
     puts "** decrypting dump"
     `rm -f #{latest_dump_path} && ccrypt -k #{secret_encryption_key_path} -d #{latest_enc_dump_path}`
+
+    puts "** Gunzipping #{latest_dump_path}"
+    result = false
+    result = system("cd db && gunzip -f #{latest_dump_path}") if File.exist?(latest_dump_path)
+    raise "Gunzipping '#{latest_dump_path}' failed with exit code: #{result}" unless result
   end
 
   def self.secret_encryption_key_path
@@ -50,11 +56,8 @@ class S3dbBackup
     puts "** using database configuration for environment: '#{database_env}'"
     config = ActiveRecord::Base.configurations[database_env]
     puts "** re-creating database #{config['database']}"
+    #@TODO create db if not yet existing (for bootstrapping an app from the db backup)
     ActiveRecord::Base.connection.recreate_database(config['database'], config)
-    puts "** Gunzipping db/latest_prod_dump.sql.gz"
-    result = false
-    result = system("cd db && gunzip -f latest_prod_dump.sql.gz") if File.exist?("db/latest_prod_dump.sql.gz")
-    raise "Gunzipping db/latest_prod_dump.sql.gz failed with exit code: #{result}" unless result
 
     puts "** Loading dump with mysql into #{config['database']}"
 

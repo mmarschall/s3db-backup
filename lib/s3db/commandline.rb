@@ -1,3 +1,5 @@
+require "s3db/encryption_key"
+
 module S3db
   class Commandline
 
@@ -20,7 +22,7 @@ module S3db
 
     def ccrypt_command
       ccrypt = locate_command_path('ccrypt')
-      "#{ccrypt} -k #{secret_encryption_key_path} -e > #{tempfile.path}"
+      "#{ccrypt} -k #{S3db::EncryptionKey.path} -e > #{tempfile.path}"
     end
 
     def gzip_command
@@ -43,12 +45,6 @@ module S3db
       command_full_path = `which #{command}`.strip
       raise "Please make sure that '#{command}' is installed and in your path!" if command_full_path.empty?
       command_full_path
-    end
-
-    def secret_encryption_key_path
-      secret_key_path = ENV['S3DB_SECRET_KEY_PATH'] || File.join(Rails.root, "db", "secret.txt")
-      raise "Please make sure you put your secret encryption key into: '#{secret_key_path}'" unless File.exists?(secret_key_path)
-      secret_key_path
     end
   end
 end

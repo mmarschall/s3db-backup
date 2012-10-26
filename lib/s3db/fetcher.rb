@@ -28,7 +28,6 @@ module S3db
       ENV['S3DB_BUCKET'] || config.aws['production']['bucket']
     end
 
-
     def retrieve_latest_dump
       bucket = choose_bucket
       last_dump_key = find_latest_dump(bucket)

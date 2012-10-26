@@ -3,8 +3,7 @@ require File.expand_path(File.join(File.dirname(__FILE__), '..', 'spec_helper'))
 describe S3db::Configuration do
 
   before do
-    stub_rails()
-    stub_s3_config_yml()
+    stub_configuration
   end
 
   describe "initialize" do

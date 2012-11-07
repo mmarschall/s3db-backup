@@ -3,7 +3,7 @@ require File.expand_path(File.join(File.dirname(__FILE__), '..', 'spec_helper'))
 describe S3db::Backup do
 
   let(:backup) { S3db::Backup.new }
-  let!(:aws) { stub_right_aws() }
+  let!(:aws) { stub_right_aws }
 
   before do
     stub_configuration

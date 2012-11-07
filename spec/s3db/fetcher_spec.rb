@@ -10,7 +10,7 @@ end
 describe S3db::Fetcher do
 
   let(:fetcher) { S3db::Fetcher.new }
-  let!(:aws) { stub_right_aws() }
+  let!(:aws) { stub_right_aws }
 
   before do
     stub_configuration

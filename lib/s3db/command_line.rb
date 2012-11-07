@@ -12,9 +12,9 @@ module S3db
 
     def dump_command
       command_chain = []
-      command_chain << mysqldump_command()
-      command_chain << gzip_command()
-      command_chain << ccrypt_command()
+      command_chain << mysqldump_command
+      command_chain << gzip_command
+      command_chain << ccrypt_command
       command_chain.join(" | ")
     end
 
@@ -30,7 +30,7 @@ module S3db
       "#{gzip} -9"
     end
 
-    def mysqldump_command()
+    def mysqldump_command
       mysqldump = locate_command_path('mysqldump')
       command_chain = []
       command_chain << mysqldump

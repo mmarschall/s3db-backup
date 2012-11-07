@@ -8,5 +8,5 @@ def s3_config_yml_contents
 end
 
 def stub_s3_config_yml
-  YAML.stub(:load_file => s3_config_yml_contents())
+  YAML.stub(:load_file => s3_config_yml_contents)
 end

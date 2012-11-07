@@ -7,7 +7,7 @@ module S3db
     attr_reader :config, :encrypted_file
 
     def initialize
-      @config = configure()
+      @config = configure
       @encrypted_file = Tempfile.new("s3db_backup_tempfile")
     end
 

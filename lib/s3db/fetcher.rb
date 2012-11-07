@@ -7,7 +7,7 @@ module S3db
     attr_reader :latest_dump_path
 
     def initialize
-      @config = configure()
+      @config = configure
       @latest_dump_path = File.join(Rails.root, "db", "latest_prod_dump.sql.gz")
     end
 

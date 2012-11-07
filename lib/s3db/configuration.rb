@@ -5,8 +5,8 @@ module S3db
     attr_reader :aws
 
     def initialize
-      @db = configure_db()
-      @aws = configure_aws()
+      @db = configure_db
+      @aws = configure_aws
     end
 
     private

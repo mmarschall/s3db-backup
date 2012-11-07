@@ -35,9 +35,12 @@ class S3dbBackup
   end
 
   def self.anonymize
-    loader.anonymize
+    loader.anonymize_database
   end
 
+  # this class method needs to live here for backward compatibility <= 0.6.4
+  # The <= 0.6.4 way of customizing the anonymization was to open S3dbBackup
+  # and redefine this method
   def self.anonymize_dump(config, connection)
   end
 end

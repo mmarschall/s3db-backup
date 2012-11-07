@@ -23,8 +23,8 @@ module S3db
     end
 
     def dump_database
-      command_line = CommandLine.new(config, encrypted_file)
-      system(command_line.dump_command)
+      command_line = CommandLine.new(config)
+      system(command_line.dump_command(encrypted_file))
     end
 
     def upload_encrypted_database_dump

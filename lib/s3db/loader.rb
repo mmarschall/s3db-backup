@@ -14,6 +14,10 @@ module S3db
       S3db::Configuration.new
     end
 
+    def command_line
+      CommandLine.new(config)
+    end
+
     def load
       recreate_database
       load_dump
@@ -38,11 +42,7 @@ module S3db
 
     def load_dump
       puts "** Loading dump with mysql into #{config.db['database']}"
-
-      result = false
-      #cmd = "$(which mysql) --user #{config.db['username']} #{"--password=#{config.db['password']}" unless config.db['password'].blank?} --database #{config.db['database']} #{"--host=#{config.db['host']}" unless config.db['host'].blank?} #{"--port=#{config.db['port']}" unless config.db['port'].blank?} < db/latest_prod_dump.sql"
-      cmd = CommandLine.new(config).load_command(latest_dump_path)
-      puts cmd
+      cmd = command_line.load_command(latest_dump_path)
       result = system(cmd)
       raise "Loading dump with mysql into #{config.db['database']} failed with exit code: #{$?}" unless result
     end

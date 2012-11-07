@@ -24,6 +24,7 @@ class S3dbBackup
     backup_instance.backup
   end
 
+  # this class method is needed for backward compatibility <= 0.6.4
   def self.fetch
     fetcher.fetch
   end

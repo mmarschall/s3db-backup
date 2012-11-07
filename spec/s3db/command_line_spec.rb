@@ -1,11 +1,11 @@
 require File.expand_path(File.join(File.dirname(__FILE__), '..', 'spec_helper'))
-describe S3db::Commandline do
+describe S3db::CommandLine do
 
   before do
     stub_configuration
   end
 
-  let(:commandline) { S3db::Commandline.new(S3db::Configuration.new, stub(:path => "/foobar")) }
+  let(:commandline) { S3db::CommandLine.new(S3db::Configuration.new, stub(:path => "/foobar")) }
 
   describe "dump_command" do
     it "includes mysqldump into the command" do

@@ -1,5 +1,5 @@
 require "s3db/configuration"
-require "s3db/commandline"
+require "s3db/command_line"
 
 module S3db
   class Backup
@@ -23,8 +23,8 @@ module S3db
     end
 
     def dump_database
-      commandline = Commandline.new(config, encrypted_file)
-      system(commandline.dump_command)
+      command_line = CommandLine.new(config, encrypted_file)
+      system(command_line.dump_command)
     end
 
     def upload_encrypted_database_dump

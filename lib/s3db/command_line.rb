@@ -1,7 +1,7 @@
 require "s3db/encryption_key"
 
 module S3db
-  class Commandline
+  class CommandLine
 
     attr_reader :config, :tempfile
 

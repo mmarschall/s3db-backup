@@ -1,5 +1,12 @@
 require File.expand_path(File.join(File.dirname(__FILE__), '..', 'spec_helper'))
 
+
+def stub_file_open
+  file = double("a file")
+  file.stub(:write)
+  File.stub(:open).and_yield(file)
+end
+
 describe S3db::Fetcher do
 
   let(:fetcher) { S3db::Fetcher.new }
@@ -34,9 +41,31 @@ describe S3db::Fetcher do
   describe "fetch" do
 
     describe "at least one file with prefix 'mysql' are found" do
-      it "uses the latest one"
-      it "downloads the latest dump"
-      it "writes the downloaded dump to a file"
+
+      it "uses the latest one" do
+        stub_file_open
+        aws.stub(:list_bucket).and_return([
+                                              {:key => "older-dump", :last_modified => "2012-10-26 00:00:00"},
+                                              {:key => "latest-dump", :last_modified => "2012-10-27 00:00:00"}
+                                          ])
+        aws.should_receive(:retrieve_object).with({:bucket => anything, :key => "latest-dump"})
+        fetcher.stub(:s3).and_return(aws)
+        fetcher.fetch
+      end
+
+      it "downloads the dump" do
+        stub_file_open
+        aws.stub(:list_bucket).and_return([{:key => anything}])
+        aws.should_receive(:retrieve_object).with(anything)
+        fetcher.stub(:s3).and_return(aws)
+        fetcher.fetch
+      end
+
+      it "writes the downloaded dump to a file" do
+        aws.stub(:list_bucket).and_return([{:key => anything}])
+        File.should_receive(:open).with(anything, "w+b")
+        fetcher.fetch
+      end
 
       it "decrypts the latest dump" do
         fetcher.should_receive(:system).with("rm -f ./db/latest_prod_dump.sql.gz && ccrypt -k ./db/secret.txt -d ./db/latest_prod_dump.sql.gz.cpt")

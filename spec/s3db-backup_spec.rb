@@ -38,4 +38,13 @@ describe "S3dbBackup" do
     end
   end
 
+  describe ".anonymize" do
+
+    let(:loader) { double("loader") }
+
+    it "calls the load method on the loader instance" do
+      loader.should_receive(:anonymize_database)
+      S3dbBackup.anonymize
+    end
+  end
 end

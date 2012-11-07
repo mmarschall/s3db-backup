@@ -48,6 +48,9 @@ describe S3db::Loader do
   end
 
   describe "anonymize_database" do
-
+    it "calls S3dbBackup.anonymize_dump" do
+      S3dbBackup.should_receive(:anonymize_dump)
+      loader.anonymize_database
+    end
   end
 end

@@ -2,11 +2,9 @@ module S3db
   class Loader
 
     attr_reader :config
-    attr_reader :latest_dump_path
-    
+
     def initialize
       @config = configure
-      @latest_dump_path = @config.latest_dump_path
     end
     
     def configure
@@ -45,7 +43,7 @@ module S3db
 
     def load_dump
       puts "** Loading dump with mysql into #{config.db['database']}"
-      cmd = command_line.load_command(latest_dump_path)
+      cmd = command_line.load_command(config.latest_dump_path)
       result = system(cmd)
       raise "Loading dump with mysql into #{config.db['database']} failed with exit code: #{$?}" unless result
     end

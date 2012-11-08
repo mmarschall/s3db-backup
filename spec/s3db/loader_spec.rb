@@ -16,9 +16,6 @@ describe S3db::Loader do
     it "has reader for config" do
       loader.config.should be_a(S3db::Configuration)
     end
-    it "has reader for latest_dump_path" do
-      loader.latest_dump_path.should == './db/latest_dump.sql'
-    end
   end
 
   describe "initialize" do

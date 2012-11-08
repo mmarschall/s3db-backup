@@ -16,7 +16,7 @@ describe S3db::Fetcher do
     stub_configuration
 
     File.stub(:open)
-    File.stub(:exists?).with('./db/latest_prod_dump.sql.gz').and_return(true)
+    File.stub(:exists?).with('./db/latest_dump.sql.gz').and_return(true)
 
     fetcher.stub(:system => 0)
     fetcher.stub(:puts)
@@ -27,13 +27,13 @@ describe S3db::Fetcher do
       fetcher.config.should be_a(S3db::Configuration)
     end
     it "has reader for latest_dump_path" do
-      fetcher.latest_dump_path.should == './db/latest_prod_dump.sql.gz'
+      fetcher.latest_dump_path.should == './db/latest_dump.sql.gz'
     end
   end
 
   describe "initialize" do
     it "instantiates a configuration instance" do
-      S3db::Configuration.should_receive(:new)
+      S3db::Configuration.should_receive(:new).and_return(double("the configuratioin").as_null_object)
       S3db::Fetcher.new
     end
   end
@@ -68,26 +68,26 @@ describe S3db::Fetcher do
       end
 
       it "decrypts the latest dump" do
-        fetcher.should_receive(:system).with("rm -f ./db/latest_prod_dump.sql.gz && ccrypt -k ./db/secret.txt -d ./db/latest_prod_dump.sql.gz.cpt")
+        fetcher.should_receive(:system).with("rm -f ./db/latest_dump.sql.gz && ccrypt -k ./db/secret.txt -d ./db/latest_dump.sql.gz.cpt")
         fetcher.fetch
       end
 
       it "decompresses the latest dump" do
-        fetcher.should_receive(:system).with("cd db && gunzip -f ./db/latest_prod_dump.sql.gz")
+        fetcher.should_receive(:system).with("cd db && gunzip -f ./db/latest_dump.sql.gz")
         fetcher.fetch
       end
 
       describe "decompression fails" do
         it "raises an error" do
           fetcher.stub(:system => false)
-          expect { fetcher.fetch }.to raise_error("Gunzipping './db/latest_prod_dump.sql.gz' failed with exit code: false")
+          expect { fetcher.fetch }.to raise_error("Gunzipping './db/latest_dump.sql.gz' failed with exit code: false")
         end
       end
 
       describe "downloaded file not existing when trying to decompress" do
         it "raises an error" do
-          File.stub(:exists?).with('./db/latest_prod_dump.sql.gz').and_return(false)
-          expect { fetcher.fetch }.to raise_error("./db/latest_prod_dump.sql.gz not found")
+          File.stub(:exists?).with('./db/latest_dump.sql.gz').and_return(false)
+          expect { fetcher.fetch }.to raise_error("./db/latest_dump.sql.gz not found")
         end
       end
     end

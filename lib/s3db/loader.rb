@@ -6,8 +6,7 @@ module S3db
     
     def initialize
       @config = configure
-      #@TODO this needs to be DRYed (see S3db::Fetcher#initialize)
-      @latest_dump_path = File.join(Rails.root, "db", "latest_prod_dump.sql")
+      @latest_dump_path = @config.latest_dump_path
     end
     
     def configure
@@ -27,7 +26,7 @@ module S3db
 
     def anonymize_database
       puts "** Anonymizing database"
-      connection_pool = ActiveRecord::Base.establish_connection(::Rails.env)
+      connection_pool = ActiveRecord::Base.establish_connection(config.db)
       S3dbBackup.anonymize_dump(config.db, connection_pool.connection) unless ::Rails.env == 'production'
     end
 
@@ -35,9 +34,13 @@ module S3db
 
     def recreate_database
       puts "** using database configuration for environment: '#{::Rails.env}'"
-      puts "** re-creating database #{config.db['database']}"
-      #@TODO create db if not yet existing (for bootstrapping an app from the db backup)
-      ActiveRecord::Base.connection.recreate_database(config.db['database'], config.db)
+      ActiveRecord::Base.establish_connection(config.db)
+      puts "** dropping database #{config.db['database']}"
+      ActiveRecord::Base.connection.drop_database(config.db['database']) rescue nil
+      puts "** creating database #{config.db['database']}"
+      ActiveRecord::Base.establish_connection(config.db.merge('database' => nil))
+      ActiveRecord::Base.connection.create_database(config.db['database'], config.db)
+      ActiveRecord::Base.establish_connection(config.db)
     end
 
     def load_dump

@@ -8,7 +8,7 @@ module S3db
 
     def initialize
       @config = configure
-      @latest_dump_path = File.join(Rails.root, "db", "latest_prod_dump.sql.gz")
+      @latest_dump_path = "#{@config.latest_dump_path}.gz"
     end
 
     def fetch

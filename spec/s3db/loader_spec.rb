@@ -17,13 +17,13 @@ describe S3db::Loader do
       loader.config.should be_a(S3db::Configuration)
     end
     it "has reader for latest_dump_path" do
-      loader.latest_dump_path.should == './db/latest_prod_dump.sql'
+      loader.latest_dump_path.should == './db/latest_dump.sql'
     end
   end
 
   describe "initialize" do
     it "instantiates a configuration instance" do
-      S3db::Configuration.should_receive(:new)
+      S3db::Configuration.should_receive(:new).and_return(double("the configuration").as_null_object)
       S3db::Loader.new
     end
   end
@@ -33,7 +33,8 @@ describe S3db::Loader do
     it "recreates the database" do
       loader.stub(:command_line => double("the command line").as_null_object)
 
-      ActiveRecord::Base.connection.should_receive(:recreate_database).with(loader.config.db['database'], loader.config.db)
+      ActiveRecord::Base.connection.should_receive(:drop_database).with(loader.config.db['database'])
+      ActiveRecord::Base.connection.should_receive(:create_database).with(loader.config.db['database'], loader.config.db)
       loader.load
     end
 

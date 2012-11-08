@@ -17,6 +17,11 @@ describe S3db::Configuration do
       config.aws.should == s3_config_yml_contents.merge({'bucket' => 's3db_backup_test_bucket'})
     end
 
+    it "sets the latest_dump_path" do
+      config = S3db::Configuration.new
+      config.latest_dump_path.should eql(File.join(::Rails.root, 'db', 'latest_dump.sql'))
+    end
+
     describe "s3 config yml" do
       describe "first-level key is missing" do
         it "throws AwsConfigurationError" do

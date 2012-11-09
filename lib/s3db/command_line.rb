@@ -47,13 +47,13 @@ module S3db
     end
 
     def locate_command_path(command)
-      command_full_path = find_executable(command).strip
+      command_full_path = find_executable(command)
       raise "Please make sure that '#{command}' is installed and in your path!" if command_full_path.empty?
       command_full_path
     end
 
     def find_executable(command)
-      `which #{command}`
+      `which #{command}`.strip
     end
 
     def mysql_params

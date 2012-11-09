@@ -32,9 +32,17 @@ module S3db
 
     def recreate_database
       puts "** using database configuration for environment: '#{::Rails.env}'"
+      drop_database
+      create_database
+    end
+
+    def drop_database
       ActiveRecord::Base.establish_connection(config.db)
       puts "** dropping database #{config.db['database']}"
       ActiveRecord::Base.connection.drop_database(config.db['database']) rescue nil
+    end
+
+    def create_database
       puts "** creating database #{config.db['database']}"
       ActiveRecord::Base.establish_connection(config.db.merge('database' => nil))
       ActiveRecord::Base.connection.create_database(config.db['database'], config.db)

@@ -40,7 +40,7 @@ describe S3db::Fetcher do
 
   describe "fetch" do
 
-    describe "at least one file with prefix 'mysql' is found" do
+    describe "at least one file with prefix 'mysql' are found" do
 
       it "uses the latest one" do
         stub_file_open
@@ -94,14 +94,14 @@ describe S3db::Fetcher do
 
     describe "no latest dump with prefix 'mysql' found" do
       it "raises an error" do
-        aws.stub(:list_files).and_return(nil)
+        aws.stub(:list_bucket).and_return(nil)
         expect { fetcher.fetch }.to raise_error("No file with prefix 'mysql' found in bucket 's3db_backup_production_bucket'")
       end
     end
 
     describe "S3DB_BUCKET not set" do
       it "uses the production bucket by default" do
-        aws.should_receive(:list_files).with("s3db_backup_production_bucket", {:prefix => "mysql"})
+        aws.should_receive(:list_bucket).with("s3db_backup_production_bucket", {:prefix => "mysql"})
         fetcher.fetch
       end
     end
@@ -109,7 +109,7 @@ describe S3db::Fetcher do
     describe "S3DB_BUCKET env set" do
       it "uses the env variable value as bucket name" do
         ENV['S3DB_BUCKET'] = "a-bucket"
-        aws.should_receive(:list_files).with("a-bucket", {:prefix => "mysql"})
+        aws.should_receive(:list_bucket).with("a-bucket", {:prefix => "mysql"})
         fetcher.fetch
         ENV['S3DB_BUCKET'] = nil
       end

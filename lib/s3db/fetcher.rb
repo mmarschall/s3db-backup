@@ -1,19 +1,18 @@
 require "s3db/encryption_key"
-require "s3db/s3_storage"
 
 module S3db
   class Fetcher
 
-    attr_reader :config, :storage
+    attr_reader :config, :s3
     attr_reader :latest_dump_path
 
     def initialize
       @config = configure
       @latest_dump_path = "#{@config.latest_dump_path}.gz"
-      @storage = storage_connection
     end
 
     def fetch
+      open_s3_connection
       retrieve_latest_dump
       decrypt
       decompress
@@ -25,18 +24,8 @@ module S3db
       S3db::Configuration.new
     end
 
-    def storage_connection
-      S3Storage.new(config)
-    end
-
-    def retrieve_latest_dump
-      bucket = choose_bucket
-      latest_dump = find_latest_dump(bucket)
-      File.open("#{latest_dump_path}.cpt", "w+b") do |f|
-        storage.retrieve_object(bucket, latest_dump) do |chunk|
-          f.write(chunk)
-        end
-      end
+    def open_s3_connection
+      @s3 = RightAws::S3Interface.new(config.aws['aws_access_key_id'], config.aws['secret_access_key'])
     end
 
     def choose_bucket
@@ -44,9 +33,20 @@ module S3db
     end
 
     def find_latest_dump(bucket)
-      all_mysql_files = storage.list_files(bucket, "mysql")
-      raise "No file with prefix 'mysql' found in bucket '#{bucket}'" if all_mysql_files.nil?
-      all_mysql_files.sort { |a, b| a[:last_modified]<=>b[:last_modified] }.last[:key]
+      all_dump_keys = s3.list_bucket(bucket, {:prefix => "mysql"})
+      raise "No file with prefix 'mysql' found in bucket '#{bucket}'" if all_dump_keys.nil?
+      all_dump_keys.sort { |a, b| a[:last_modified]<=>b[:last_modified] }.last
+    end
+
+    def retrieve_latest_dump
+      bucket = choose_bucket
+      last_dump_key = find_latest_dump(bucket)
+      puts "** Getting #{last_dump_key[:key]} from #{bucket}"
+      File.open("#{latest_dump_path}.cpt", "w+b") do |f|
+        s3.retrieve_object(:bucket => bucket, :key => last_dump_key[:key]) do |chunk|
+          f.write(chunk)
+        end
+      end
     end
 
     def decrypt

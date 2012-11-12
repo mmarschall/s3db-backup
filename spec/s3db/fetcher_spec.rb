@@ -40,11 +40,11 @@ describe S3db::Fetcher do
 
   describe "fetch" do
 
-    describe "at least one file with prefix 'mysql' are found" do
+    describe "at least one file with prefix 'mysql' is found" do
 
       it "uses the latest one" do
         stub_file_open
-        aws.stub(:list_files).and_return([
+        aws.stub(:list_bucket).and_return([
                                               {:key => "older-dump", :last_modified => "2012-10-26 00:00:00"},
                                               {:key => "latest-dump", :last_modified => "2012-10-27 00:00:00"}
                                           ])
@@ -55,14 +55,14 @@ describe S3db::Fetcher do
 
       it "downloads the dump" do
         stub_file_open
-        aws.stub(:list_files).and_return([{:key => anything}])
+        aws.stub(:list_bucket).and_return([{:key => anything}])
         aws.should_receive(:retrieve_object).with(anything)
         fetcher.stub(:s3).and_return(aws)
         fetcher.fetch
       end
 
       it "writes the downloaded dump to a file" do
-        aws.stub(:list_files).and_return([{:key => anything}])
+        aws.stub(:list_bucket).and_return([{:key => anything}])
         File.should_receive(:open).with(anything, "w+b")
         fetcher.fetch
       end

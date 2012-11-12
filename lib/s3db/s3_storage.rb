@@ -8,12 +8,13 @@ module S3db
       @connection = open_s3_connection
     end
 
-    def retrieve_object(bucket, key)
-      connection.retrieve_object(:bucket => bucket, :key => key)
+    def retrieve_object(bucket, key, &block)
+      puts "** Getting #{key} from #{bucket}"
+      connection.retrieve_object(:bucket => bucket, :key => key)#, &block)
     end
 
     def list_files(bucket, prefix = "")
-      connection.list_files(bucket, {:prefix => prefix})
+      connection.list_bucket(bucket, {:prefix => prefix})
     end
 
     def put(bucket, file_name, source_file)

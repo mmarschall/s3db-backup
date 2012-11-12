@@ -10,7 +10,7 @@ module S3db
     def initialize
       @config = configure
       @latest_dump_path = "#{@config.latest_dump_path}.gz"
-      @storage = S3Storage.new(@config)
+      @storage = storage_connection
     end
 
     def fetch
@@ -25,10 +25,13 @@ module S3db
       S3db::Configuration.new
     end
 
+    def storage_connection
+      S3Storage.new(config)
+    end
+
     def retrieve_latest_dump
       bucket = choose_bucket
       latest_dump = find_latest_dump(bucket)
-      puts "** Getting #{latest_dump} from #{bucket}"
       File.open("#{latest_dump_path}.cpt", "w+b") do |f|
         storage.retrieve_object(bucket, latest_dump) do |chunk|
           f.write(chunk)

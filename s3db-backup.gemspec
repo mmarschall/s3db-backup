@@ -1,10 +1,10 @@
 # -*- encoding: utf-8 -*-
 $:.push File.expand_path("../lib", __FILE__)
-require 's3db-backup'
+require 's3db/version'
 
 Gem::Specification.new do |s|
   s.name        = "s3db-backup"
-  s.version     = S3dbBackup::VERSION
+  s.version     = S3db::VERSION
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["Matthias Marschall"]
   s.email       = ["mm@agileweboperations.com"]
@@ -19,5 +19,4 @@ Gem::Specification.new do |s|
 
   s.add_runtime_dependency 'right_aws', '>= 2.0.0'
   s.add_development_dependency 'rspec', '>= 1.2.9'
-  s.add_development_dependency 'rails', '~> 2.3'
 end

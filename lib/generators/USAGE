@@ -1,0 +1,13 @@
+Description:
+    Generates rake tasks for backups and restores to and from amazon s3.
+    You will need to edit 'config/s3_config.yml' and fill in your AWS
+    credentials and you will need to edit 'db/secret.txt' to set your
+    own secret encryption key (any long and complicated string will do).
+
+Example:
+    rails generate s3db_config
+
+    This will create:
+        lib/tasks/s3db_backup.rake
+        config/s3_config.yml
+        db/secret.txt

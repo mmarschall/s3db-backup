@@ -23,11 +23,13 @@ And, of course, you'll need to sign up for an Amazon S3 account and create a buc
 * Install the <em>s3db-backup</em> gem
 
     sudo gem install s3db-backup
-	
-* Run the <em>s3db_backup</em> generator to generate the necessary config files and rake tasks
-  NOTE: This currently works only in a Rails 2.x app. You can create the files manually in your Rails 3.x app. Everything will run fine from there on.
 
-    $ script/generate s3db_backup
+  Alternatively you can simply add it to your <tt>Gemfile</tt> and run <tt>bundle install</tt>.
+	
+* Run the <em>s3db_config</em> generator to generate the necessary config files and rake tasks
+  NOTE: This currently works only in a Rails 3.x app. You can create the files manually in your Rails 2.x app. Everything will run fine from there on.
+
+    $ rails generate s3db_config
 	
 This will generate the following files: <tt>config/s3_config.yml</tt>, <tt>db/secret.txt</tt>, and <tt>lib/tasks/db.rake</tt>
 

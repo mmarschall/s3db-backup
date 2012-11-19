@@ -40,8 +40,23 @@ describe S3db::Loader do
       command_line.stub(:find_executable).and_return { |args| args }
       loader.stub(:command_line).and_return(command_line)
 
-      loader.should_receive(:system).with(/mysql/)
+      loader.should_receive(:system).with(/mysql.*s3db_backup_test/)
       loader.load
+    end
+
+    describe "environment S3DB_DATABASE is set" do
+      before do
+        ENV['S3DB_DATABASE'] = "my_development_db"
+      end
+
+      it "uses the given database" do
+        loader.should_receive(:system).with(/my_development_db/)
+        loader.load
+      end
+
+      after do
+        ENV['S3DB_DATABASE'] = nil
+      end
     end
   end
 

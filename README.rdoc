@@ -81,7 +81,7 @@ As <em>s3db-backup</em> only uses standard Unix tools for the job, its pretty ea
 
 * Download the latest backup from your Amazon S3 bucket e.g. <tt>mysql-my_app-production-22-09-2010-11h24m10s.sql.gz.cpt</tt>
 * Decrypt the file using your key from <tt>db/secret.txt</tt>
-	ccdecrypt mysql-my_app-production-22-09-2010-11h24m10s.sql.gz.cpt
+    ccdecrypt mysql-my_app-production-22-09-2010-11h24m10s.sql.gz.cpt
 * Unzip the SQL file
     gunzip mysql-my_app-production-22-09-2010-11h24m10s.sql.gz
 * Re-create your database

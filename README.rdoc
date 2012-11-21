@@ -35,26 +35,26 @@ This will generate the following files: <tt>config/s3_config.yml</tt>, <tt>db/se
 
 * Store your AWS access credentials and your desired S3 buckets in the new <tt>config/s3_config.yml</tt>:
 
-	aws_access_key_id: "<your aws access key here>"
-	secret_access_key: "<your aws secret key here>"
+    aws_access_key_id: "<your aws access key here>"
+    secret_access_key: "<your aws secret key here>"
 
-	production:
-	    bucket: "my_app-production"
+    production:
+        bucket: "my_app-production"
 
-	development: 
-	    bucket: "my_app-development"
+    development:
+        bucket: "my_app-development"
 
 <em>s3db-backup</em> expects the buckets you name there to exist. Please make sure they do (using the Amazon AWS Management Console or any other Amazon Management Tool)
 
 * Put a long and random string as your encryption/decryption key for <tt>ccrypt</tt> into <tt>db/secret.txt</tt>
 
-	$ echo "my secret key" > db/secret.txt
+    $ echo "my secret key" > db/secret.txt
 
 == Running a Backup
 	
 Dumping, encrypting, and uploading your current database is now as easy as typing one command:
 	
-	$ rake s3db:backup
+    $ rake s3db:backup
 	
 When its done, go to your amazon S3 bucket and see your shiny new backup file there!
 	
@@ -64,7 +64,7 @@ To be able to <em>fetch</em> your backups from S3 and <em>load</em> them into yo
 
 * Fetch the latest backup from S3 to your local disk as <tt>db/latest_prod_dump.sql</tt>:
 
-	$ rake s3db:latest:fetch
+    $ rake s3db:latest:fetch
 	
 Now you can either load that SQL dump with any tool you like or use a second rake task:
 	
@@ -72,7 +72,7 @@ Now you can either load that SQL dump with any tool you like or use a second rak
 
 <b>ATTENTION</b>: This step will DROP your database and re-create it from your backup. Be careful when applying to your production environment. You have been warned!
 
-	$ rake s3db:latest:load
+    $ rake s3db:latest:load
 	
 == Restoring a Backup Manually
 
@@ -83,11 +83,11 @@ As <em>s3db-backup</em> only uses standard Unix tools for the job, its pretty ea
 * Decrypt the file using your key from <tt>db/secret.txt</tt>
 	ccdecrypt mysql-my_app-production-22-09-2010-11h24m10s.sql.gz.cpt
 * Unzip the SQL file
-	gunzip mysql-my_app-production-22-09-2010-11h24m10s.sql.gz
+    gunzip mysql-my_app-production-22-09-2010-11h24m10s.sql.gz
 * Re-create your database
-	rake db:create
+    rake db:create
 * Load the dump into mysql
-	mysql -u <your_db_user> -p <your_db> < mysql-my_app-production-22-09-2010-11h24m10s.sql
+    mysql -u <your_db_user> -p <your_db> < mysql-my_app-production-22-09-2010-11h24m10s.sql
 	
 Now you should have your DB restored.
 
@@ -95,8 +95,7 @@ Now you should have your DB restored.
  
 * Fork the project.
 * Make your feature addition or bug fix.
-* Add tests for it. This is important so I don't break it in a
-  future version unintentionally.
+* Add tests for it. This is important so I don't break it in a future version unintentionally.
 * Commit, do not mess with rakefile, version, or history.
   (if you want to have your own version, that is fine but bump version in a commit by itself I can ignore when I pull)
 * Send me a pull request. Bonus points for topic branches.

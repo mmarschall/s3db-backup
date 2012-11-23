@@ -43,21 +43,6 @@ describe S3db::Loader do
       loader.should_receive(:system).with(/mysql.*s3db_backup_test/)
       loader.load
     end
-
-    describe "environment S3DB_DATABASE is set" do
-      before do
-        ENV['S3DB_DATABASE'] = "my_development_db"
-      end
-
-      it "uses the given database" do
-        loader.should_receive(:system).with(/my_development_db/)
-        loader.load
-      end
-
-      after do
-        ENV['S3DB_DATABASE'] = nil
-      end
-    end
   end
 
   describe "anonymize_database" do

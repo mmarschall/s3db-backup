@@ -14,7 +14,8 @@ module S3db
     private
 
     def configure_db
-      ActiveRecord::Base.configurations[::Rails.env]
+      database_config = ENV['S3DB_DATABASE_CONFIG'] || ::Rails.env
+      ActiveRecord::Base.configurations[database_config]
     end
 
     def configure_aws

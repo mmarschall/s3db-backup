@@ -16,7 +16,6 @@ module S3db
     end
 
     def load
-      choose_database
       recreate_database
       load_dump
       anonymize_database
@@ -30,10 +29,6 @@ module S3db
     end
 
     private
-
-    def choose_database
-      config.db['database'] = ENV['S3DB_DATABASE'] if ENV['S3DB_DATABASE']
-    end
 
     def recreate_database
       puts "** using database configuration for environment: '#{::Rails.env}'"

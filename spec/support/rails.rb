@@ -22,6 +22,13 @@ def rails_configurations
           "database" => "s3db_backup_test",
           "password" => "secret",
           "adapter" => "mysql2"
+      },
+      'other_db_config' => {
+        "username" => "my_app",
+        "encoding" => "utf8",
+        "database" => "my_other_db",
+        "password" => "another_secret",
+        "adapter" => "mysql2"
       }
   }
 end

@@ -1,3 +1,5 @@
+{<img src="https://codeclimate.com/github/mmarschall/s3db-backup.png" />}[https://codeclimate.com/github/mmarschall/s3db-backup]
+
 = <em>s3db-backup</em> for Rails
 
 Its good practice to have a backup of your database ready at some other place than your production setup in case anything goes badly wrong there. And its a good idea to test your backups regularily. This gem will help you do both in a snap.

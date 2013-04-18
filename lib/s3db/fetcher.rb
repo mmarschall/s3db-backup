@@ -3,16 +3,18 @@ require "s3db/encryption_key"
 module S3db
   class Fetcher
 
-    attr_reader :config, :s3
+    attr_reader :config
     attr_reader :latest_dump_path
+    attr_accessor :storage
 
     def initialize
       @config = configure
       @latest_dump_path = "#{@config.latest_dump_path}.gz"
+      @storage = S3db::Storage.new
     end
 
     def fetch
-      open_s3_connection
+      storage.connect
       retrieve_latest_dump
       decrypt
       decompress
@@ -24,26 +26,22 @@ module S3db
       S3db::Configuration.new
     end
 
-    def open_s3_connection
-      @s3 = RightAws::S3Interface.new(config.aws['aws_access_key_id'], config.aws['secret_access_key'])
-    end
-
     def choose_bucket
       ENV['S3DB_BUCKET'] || config.aws['production']['bucket']
     end
 
     def find_latest_dump(bucket)
-      all_dump_keys = s3.list_bucket(bucket, {:prefix => "mysql"})
-      raise "No file with prefix 'mysql' found in bucket '#{bucket}'" if all_dump_keys.nil?
-      all_dump_keys.sort { |a, b| a[:last_modified]<=>b[:last_modified] }.last
+      files = storage.list_files(bucket, {:prefix => "mysql"})
+      raise "No file with prefix 'mysql' found in bucket '#{bucket}'" if files.nil?
+      files.sort { |a, b| a[:last_modified]<=>b[:last_modified] }.last
     end
 
     def retrieve_latest_dump
       bucket = choose_bucket
-      last_dump_key = find_latest_dump(bucket)
-      puts "** Getting #{last_dump_key[:key]} from #{bucket}"
+      latest_dump = find_latest_dump(bucket)
+      puts "** Getting #{latest_dump[:key]} from #{bucket}"
       File.open("#{latest_dump_path}.cpt", "w+b") do |f|
-        s3.retrieve_object(:bucket => bucket, :key => last_dump_key[:key]) do |chunk|
+        storage.retrieve_object(bucket, latest_dump[:key]) do |chunk|
           f.write(chunk)
         end
       end

@@ -18,5 +18,6 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
 
   s.add_runtime_dependency 'right_aws', '>= 2.0.0'
+  #s.add_runtime_dependency 'fog', '>= 1.10.0'
   s.add_development_dependency 'rspec', '>= 1.2.9'
 end

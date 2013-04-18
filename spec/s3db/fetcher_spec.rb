@@ -10,10 +10,11 @@ end
 describe S3db::Fetcher do
 
   let(:fetcher) { S3db::Fetcher.new }
-  let!(:aws) { stub_right_aws }
 
   before do
     stub_configuration
+
+    fetcher.storage = stub_storage
 
     File.stub(:open)
     File.stub(:exists?).with('./db/latest_dump.sql.gz').and_return(true)
@@ -21,6 +22,7 @@ describe S3db::Fetcher do
     fetcher.stub(:system => 0)
     fetcher.stub(:puts)
   end
+
 
   describe "attributes" do
     it "has reader for config" do
@@ -33,7 +35,7 @@ describe S3db::Fetcher do
 
   describe "initialize" do
     it "instantiates a configuration instance" do
-      S3db::Configuration.should_receive(:new).and_return(double("the configuratioin").as_null_object)
+      S3db::Configuration.should_receive(:new).at_least(1).and_return(double("the configuration").as_null_object)
       S3db::Fetcher.new
     end
   end
@@ -44,25 +46,23 @@ describe S3db::Fetcher do
 
       it "uses the latest one" do
         stub_file_open
-        aws.stub(:list_bucket).and_return([
+        fetcher.storage.stub(:list_files).and_return([
                                               {:key => "older-dump", :last_modified => "2012-10-26 00:00:00"},
                                               {:key => "latest-dump", :last_modified => "2012-10-27 00:00:00"}
                                           ])
-        aws.should_receive(:retrieve_object).with({:bucket => anything, :key => "latest-dump"})
-        fetcher.stub(:s3).and_return(aws)
+        fetcher.storage.should_receive(:retrieve_object).with(anything, "latest-dump")
         fetcher.fetch
       end
 
       it "downloads the dump" do
         stub_file_open
-        aws.stub(:list_bucket).and_return([{:key => anything}])
-        aws.should_receive(:retrieve_object).with(anything)
-        fetcher.stub(:s3).and_return(aws)
+        fetcher.storage.stub(:list_files).and_return([{:key => anything}])
+        fetcher.storage.should_receive(:retrieve_object).with(anything, anything)
         fetcher.fetch
       end
 
       it "writes the downloaded dump to a file" do
-        aws.stub(:list_bucket).and_return([{:key => anything}])
+        fetcher.storage.stub(:list_files).and_return([{:key => anything}])
         File.should_receive(:open).with(anything, "w+b")
         fetcher.fetch
       end
@@ -94,14 +94,14 @@ describe S3db::Fetcher do
 
     describe "no latest dump with prefix 'mysql' found" do
       it "raises an error" do
-        aws.stub(:list_bucket).and_return(nil)
+        fetcher.storage.stub(:list_files).and_return(nil)
         expect { fetcher.fetch }.to raise_error("No file with prefix 'mysql' found in bucket 's3db_backup_production_bucket'")
       end
     end
 
     describe "S3DB_BUCKET not set" do
       it "uses the production bucket by default" do
-        aws.should_receive(:list_bucket).with("s3db_backup_production_bucket", {:prefix => "mysql"})
+        fetcher.storage.should_receive(:list_files).with("s3db_backup_production_bucket", {:prefix => "mysql"}).and_return([:key => "mysql-bla"])
         fetcher.fetch
       end
     end
@@ -109,7 +109,7 @@ describe S3db::Fetcher do
     describe "S3DB_BUCKET env set" do
       it "uses the env variable value as bucket name" do
         ENV['S3DB_BUCKET'] = "a-bucket"
-        aws.should_receive(:list_bucket).with("a-bucket", {:prefix => "mysql"})
+        fetcher.storage.should_receive(:list_files).with("a-bucket", {:prefix => "mysql"}).and_return([:key => "mysql-bla"])
         fetcher.fetch
         ENV['S3DB_BUCKET'] = nil
       end

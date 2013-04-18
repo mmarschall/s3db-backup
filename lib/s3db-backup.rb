@@ -4,6 +4,7 @@ require "tempfile"
 require "s3db/backup"
 require "s3db/fetcher"
 require "s3db/loader"
+require "s3db/storage"
 
 class S3dbBackup
 

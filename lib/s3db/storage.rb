@@ -18,6 +18,10 @@ module S3db
       end
     end
 
+    def put_object(bucket, key, object)
+      connection.put(bucket, key, object)
+    end
+
     def connect
       @connection = RightAws::S3Interface.new(config.aws['aws_access_key_id'], config.aws['secret_access_key'])
     end

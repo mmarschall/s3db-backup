@@ -3,11 +3,11 @@ require File.expand_path(File.join(File.dirname(__FILE__), '..', 'spec_helper'))
 describe S3db::Backup do
 
   let(:backup) { S3db::Backup.new }
-  let!(:aws) { stub_right_aws }
 
   before do
     stub_configuration
     backup.stub(:system)
+    backup.storage = stub_storage
   end
 
   describe "attributes" do
@@ -21,7 +21,7 @@ describe S3db::Backup do
 
   describe "initialize" do
     it "instantiates a configuration instance" do
-      S3db::Configuration.should_receive(:new)
+      S3db::Configuration.should_receive(:new).at_least(1)
       S3db::Backup.new
     end
 
@@ -33,7 +33,8 @@ describe S3db::Backup do
 
   describe "backup" do
     it "uploads encrypted and compressed database dump to given S3 bucket" do
-      aws.should_receive(:put)
+      backup.storage.should_receive(:connect)
+      backup.storage.should_receive(:put_object)
       backup.backup
     end
   end

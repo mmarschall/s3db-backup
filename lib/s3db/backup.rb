@@ -4,11 +4,15 @@ require "s3db/command_line"
 module S3db
   class Backup
 
-    attr_reader :config, :encrypted_file
+    attr_reader :config
+    attr_reader :encrypted_file
+    attr_accessor :storage
+
 
     def initialize
       @config = configure
       @encrypted_file = Tempfile.new("s3db_backup_tempfile")
+      @storage = S3db::Storage.new
     end
 
     def backup
@@ -29,8 +33,8 @@ module S3db
 
     def upload_encrypted_database_dump
       mysql_dump_file_name = "mysql-#{config.db['database']}-#{Time.now.strftime('%Y-%m-%d-%Hh%Mm%Ss')}.sql.gz.cpt"
-      s3 = RightAws::S3Interface.new(config.aws['aws_access_key_id'], config.aws['secret_access_key'])
-      s3.put("#{config.aws['bucket']}", "#{mysql_dump_file_name}", encrypted_file.open)
+      storage.connect
+      storage.put_object("#{config.aws['bucket']}", "#{mysql_dump_file_name}", encrypted_file.open)
     end
   end
 end

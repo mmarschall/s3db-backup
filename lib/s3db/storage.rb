@@ -20,6 +20,7 @@ module S3db
 
     def put_object(bucket, key, object)
       connection.put(bucket, key, object)
+      key
     end
 
     def connect

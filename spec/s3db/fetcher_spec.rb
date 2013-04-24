@@ -1,12 +1,6 @@
 require File.expand_path(File.join(File.dirname(__FILE__), '..', 'spec_helper'))
 
 
-def stub_file_open
-  file = double("a file")
-  file.stub(:write)
-  File.stub(:open).and_yield(file)
-end
-
 describe S3db::Fetcher do
 
   let(:fetcher) { S3db::Fetcher.new }
@@ -42,7 +36,7 @@ describe S3db::Fetcher do
 
   describe "fetch" do
 
-    describe "at least one file with prefix 'mysql' are found" do
+    describe "at least one file with prefix 'mysql' is found" do
 
       it "uses the latest one" do
         stub_file_open

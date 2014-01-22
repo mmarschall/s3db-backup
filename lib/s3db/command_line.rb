@@ -35,7 +35,7 @@ module S3db
 
     def gzip_command
       gzip = locate_command_path('gzip')
-      "#{gzip} -9"
+      "#{gzip} -#{config.compression}"
     end
 
     def mysqldump_command

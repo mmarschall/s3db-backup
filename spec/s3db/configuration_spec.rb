@@ -29,6 +29,17 @@ describe S3db::Configuration do
       config.aws.should == s3_config_yml_contents.merge({'bucket' => 's3db_backup_test_bucket'})
     end
 
+    it "should use the default gzip compression rate of 9" do
+      config = S3db::Configuration.new
+      config.compression.should == '9'
+    end
+
+    it "should allow you to override the compression used in gzip" do
+      YAML.stub(:load_file => s3_config_yml_contents.merge({'compression' => '6'}))
+      config = S3db::Configuration.new
+      config.compression.should == '6'
+    end
+
     describe "handling of missing keys in s3_config.yml" do
       context "when AWS authentication key is missing" do
         it "throws AwsConfigurationError" do

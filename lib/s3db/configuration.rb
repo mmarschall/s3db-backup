@@ -42,7 +42,7 @@ module S3db
 
   class AwsConfigurationError < StandardError
     def initialize(key)
-      super("Please specify your #{key} in config/s3config.yml")
+      super("Please specify your #{key} in config/s3_config.yml")
     end
   end
 end

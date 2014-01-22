@@ -13,7 +13,7 @@ describe S3db::CommandLine do
     let(:tempfile) { stub(:path => "/foobar") }
 
     it "includes mysqldump into the command" do
-      command_line.dump_command(tempfile).should =~ /mysqldump --user=app --password=secret s3db_backup_test/
+      command_line.dump_command(tempfile).should =~ /mysqldump --user=app --password='secret' s3db_backup_test/
     end
 
     it "includes gzip into the command" do
@@ -34,7 +34,7 @@ describe S3db::CommandLine do
     let(:latest_dump) { File.join(Rails.root, "db", "latest_prod_dump.sql") }
 
     it "includes mysql into the command" do
-      command_line.load_command(anything).should =~ /mysql --user=app --password=secret --database=s3db_backup_test/
+      command_line.load_command(anything).should =~ /mysql --user=app --password='secret' --database=s3db_backup_test/
     end
 
     describe "db host and port are given" do

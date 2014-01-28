@@ -40,6 +40,12 @@ describe S3db::Configuration do
       config.compression.should == '6'
     end
 
+    it "should allow you to define custom mysqldump parameters" do
+      YAML.stub(:load_file => s3_config_yml_contents.merge({'mysql_options' => ['quick', 'single-transaction']}))
+      config = S3db::Configuration.new
+      config.mysql_options == ['quick', 'single-transaction']
+    end
+
     describe "handling of missing keys in s3_config.yml" do
       context "when AWS authentication key is missing" do
         it "throws AwsConfigurationError" do

@@ -4,12 +4,14 @@ module S3db
     attr_reader :db
     attr_reader :aws
     attr_reader :compression
+    attr_reader :mysql_options
     attr_reader :latest_dump_path
 
     def initialize
       @db = configure_db
       @aws = configure_aws
       @compression = @aws.fetch('compression', '9')
+      @mysql_options = @aws.fetch('mysql_options', [])
       @latest_dump_path = File.join(::Rails.root, 'db', "latest_dump.sql")
     end
 

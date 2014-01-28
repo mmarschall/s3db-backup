@@ -62,6 +62,13 @@ module S3db
       command_chain << "--password='#{config.db['password']}'" if config.db['password']
       command_chain << "--host=#{config.db['host']}" if config.db['host']
       command_chain << "--port=#{config.db['port']}" if config.db['port']
+
+      if config.mysql_options.any?
+        config.mysql_options.each do |custom_command|
+          command_chain << "--#{custom_command}"
+        end
+      end
+
       command_chain.join(" ")
     end
   end

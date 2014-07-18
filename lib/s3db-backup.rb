@@ -4,6 +4,7 @@ require "tempfile"
 require "s3db/backup"
 require "s3db/fetcher"
 require "s3db/loader"
+require "s3db/deleter"
 
 class S3dbBackup
 
@@ -12,7 +13,7 @@ class S3dbBackup
   end
 
   def self.fetcher
-    S3db::Fetcher.new
+    S3db::Fetcher.new 
   end
 
   def self.loader

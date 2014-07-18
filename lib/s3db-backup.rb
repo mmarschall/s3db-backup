@@ -27,7 +27,7 @@ class S3dbBackup
   # this class method is needed for backward compatibility <= 0.6.4
   def self.backup
     backup_instance.backup
-    cleanup
+    clean
   end
 
   # this class method is needed for backward compatibility <= 0.6.4

@@ -15,6 +15,10 @@ class S3dbBackup
   def self.fetcher
     S3db::Fetcher.new 
   end
+  
+  def self.deleter
+    S3db::Deleter.new
+  end
 
   def self.loader
     S3db::Loader.new
@@ -23,6 +27,7 @@ class S3dbBackup
   # this class method is needed for backward compatibility <= 0.6.4
   def self.backup
     backup_instance.backup
+    cleanup
   end
 
   # this class method is needed for backward compatibility <= 0.6.4
@@ -33,6 +38,10 @@ class S3dbBackup
   # this class method is needed for backward compatibility <= 0.6.4
   def self.load
     loader.load
+  end
+  
+  def self.clean
+    deleter.clean
   end
 
   def self.anonymize

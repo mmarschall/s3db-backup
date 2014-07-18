@@ -6,13 +6,14 @@ module S3db
 
     def initialize
       @config = configure
-      # Work needed here
       @max_num_backups = @config.aws['max_num_backups']
     end
 
-    def delete
-      open_s3_connection
-      delete_extra_dumps
+    def clean
+      if max_num_backups
+        open_s3_connection
+        delete_extra_dumps
+      end
     end
 
     private
@@ -31,7 +32,7 @@ module S3db
     
     def delete_extra_dumps
       bucket = choose_bucket
-      delete_dumps(deletable_dumps(bucket))
+      delete_dumps(bucket, deletable_dumps(bucket))
     end
 
     def all_dumps(bucket)
@@ -42,12 +43,14 @@ module S3db
     
     def deletable_dumps(bucket)
       all_dump_keys = all_dumps(bucket)
-      all_dump_keys[0..(all_dump_keys - max_num_backups + 1)]
+      last = all_dump_keys.length - max_num_backups - 1
+      return [] if last<0
+      all_dump_keys[0..(all_dump_keys.length - max_num_backups - 1)]
     end
     
-    def delete_dumps(dumps)
+    def delete_dumps(bucket, dumps)
       dumps.each do |dump|
-        s3.delete(dump[:key])
+        s3.delete(bucket, dump[:key])
       end
     end
     

@@ -45,7 +45,7 @@ module S3db
       all_dump_keys = all_dumps(bucket)
       last = all_dump_keys.length - max_num_backups - 1
       return [] if last<0
-      all_dump_keys[0..(all_dump_keys.length - max_num_backups - 1)]
+      all_dump_keys[0..last]
     end
     
     def delete_dumps(bucket, dumps)

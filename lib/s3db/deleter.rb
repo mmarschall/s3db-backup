@@ -1,12 +1,13 @@
 module S3db
   class Deleter
 
-    attr_reader :config, :s3
+    attr_reader :config, :s3, :bucket
     attr_reader :max_num_backups
 
     def initialize
       @config = configure
       @max_num_backups = @config.aws['max_num_backups']
+      @bucket = choose_bucket
     end
 
     def clean
@@ -31,24 +32,23 @@ module S3db
     end
     
     def delete_extra_dumps
-      bucket = choose_bucket
-      delete_dumps(bucket, deletable_dumps(bucket))
+      delete_dumps(bucket, deletable_dumps)
     end
 
-    def all_dumps(bucket)
+    def all_dumps
       all_dump_keys = s3.list_bucket(bucket, {:prefix => "mysql"})
       raise "No file with prefix 'mysql' found in bucket '#{bucket}'" if all_dump_keys.nil?
       all_dump_keys.sort { |a, b| a[:last_modified]<=>b[:last_modified] }
     end
     
-    def deletable_dumps(bucket)
-      all_dump_keys = all_dumps(bucket)
+    def deletable_dumps
+      all_dump_keys = all_dumps
       last = all_dump_keys.length - max_num_backups - 1
       return [] if last<0
       all_dump_keys[0..last]
     end
     
-    def delete_dumps(bucket, dumps)
+    def delete_dumps(dumps)
       dumps.each do |dump|
         s3.delete(bucket, dump[:key])
       end

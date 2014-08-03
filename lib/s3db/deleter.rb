@@ -8,11 +8,11 @@ module S3db
       @config = configure
       @max_num_backups = @config.aws['max_num_backups']
       @bucket = choose_bucket
+      @s3 = open_s3_connection
     end
 
     def clean
       if max_num_backups
-        open_s3_connection
         delete_extra_dumps
       end
     end

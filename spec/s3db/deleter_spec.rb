@@ -80,6 +80,17 @@ describe S3db::Deleter do
         deleter.all_dumps
       end
     end
+    
+    describe "S3DB_BUCKET env set" do
+      it "uses the env variable value as bucket name" do
+        ENV['S3DB_BUCKET'] = "a-bucket"
+        deleter = S3db::Deleter.new
+        deleter.stub(:s3).and_return(aws)
+        aws.should_receive(:list_bucket).with("a-bucket", {:prefix => "mysql"})
+        deleter.all_dumps
+        ENV['S3DB_BUCKET'] = nil
+      end
+    end
 
   end
 end

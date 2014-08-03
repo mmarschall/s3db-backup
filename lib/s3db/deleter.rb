@@ -17,22 +17,8 @@ module S3db
       end
     end
 
-    private
-
-    def configure
-      S3db::Configuration.new
-    end
-
-    def open_s3_connection
-      @s3 = RightAws::S3Interface.new(config.aws['aws_access_key_id'], config.aws['secret_access_key'])
-    end
-
-    def choose_bucket
-      ENV['S3DB_BUCKET'] || config.aws['production']['bucket']
-    end
-    
     def delete_extra_dumps
-      delete_dumps(bucket, deletable_dumps)
+      delete_dumps(deletable_dumps)
     end
 
     def all_dumps
@@ -52,6 +38,20 @@ module S3db
       dumps.each do |dump|
         s3.delete(bucket, dump[:key])
       end
+    end
+    
+    private
+    
+    def configure
+      S3db::Configuration.new
+    end
+
+    def open_s3_connection
+      @s3 = RightAws::S3Interface.new(config.aws['aws_access_key_id'], config.aws['secret_access_key'])
+    end
+
+    def choose_bucket
+      ENV['S3DB_BUCKET'] || config.aws['production']['bucket']
     end
     
   end

@@ -39,21 +39,20 @@ describe S3db::Deleter do
   
   describe "max_num_backups set" do
     describe "all_dumps" do
-      it "list all dumps sorted in descending order" do
-        deleter.all_dumps.length.should > 1
+      it "lists 3 dumps" do
+        deleter.all_dumps.length.should == 3
       end
     end
     
     describe "deletable_dumps" do
       it "lists just 1 dump as deletable" do
-        deleter.should_have(1).deletable_dumps
+        deleter.deletable_dumps.length.should == 1
       end
     end
     
     describe "delete_dumps" do
       it "calls delete on the 1 oldest dump" do
-        dumps[0].should_recieve(:delete).with({:bucket=> anything, :key => "oldest"})
-        
+        aws.should_receive(:delete).with(anything, "oldest-dump")
         deleter.clean
       end
     end
@@ -61,18 +60,19 @@ describe S3db::Deleter do
   
   describe "max_num_backups not set" do
     it "should not call open_s3_connection" do
-      deleter.stub(:max_backups).and_return(nil)
-      deleter.should_not_recieve(:open_s3_connection)
+      deleter.stub(:max_num_backups).and_return(nil)
+      deleter.should_not_receive(:open_s3_connection)
       deleter.clean
     end
     
     it "should not call delete_extra_dumps" do
-      deleter.stub(:max_backups).and_return(nil)
-      deleter.should_not_recieve(:delete_extra_dumps)
+      deleter.stub(:max_num_backups).and_return(nil)
+      deleter.should_not_receive(:delete_extra_dumps)
+      deleter.clean
     end
   end
 
-  describe "fetch" do
+  describe "all_dumps" do
 
     describe "S3DB_BUCKET not set" do
       it "uses the production bucket by default" do
@@ -81,13 +81,5 @@ describe S3db::Deleter do
       end
     end
 
-    describe "S3DB_BUCKET env set" do
-      it "uses the env variable value as bucket name" do
-        ENV['S3DB_BUCKET'] = "a-bucket"
-        aws.should_receive(:list_bucket).with("a-bucket", {:prefix => "mysql"})
-        deleter.all_dumps
-        ENV['S3DB_BUCKET'] = nil
-      end
-    end
   end
 end

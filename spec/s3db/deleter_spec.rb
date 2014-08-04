@@ -1,6 +1,4 @@
 require File.expand_path(File.join(File.dirname(__FILE__), '..', 'spec_helper'))
-require 'pry'
-
 
 describe S3db::Deleter do
 
@@ -37,34 +35,26 @@ describe S3db::Deleter do
     end
   end
   
-  describe "max_num_backups set" do
-    describe "all_dumps" do
-      it "lists 3 dumps" do
-        deleter.all_dumps.length.should == 3
-      end
+  describe "all_dumps" do
+    it "lists 3 dumps" do
+      deleter.all_dumps.length.should == 3
     end
+  end
     
-    describe "deletable_dumps" do
-      it "lists just 1 dump as deletable" do
-        deleter.deletable_dumps.length.should == 1
-      end
+  describe "deletable_dumps" do
+    it "lists just 1 dump as deletable" do
+      deleter.deletable_dumps.length.should == 1
     end
-    
-    describe "delete_dumps" do
-      it "calls delete on the 1 oldest dump" do
-        aws.should_receive(:delete).with(anything, "oldest-dump")
-        deleter.clean
-      end
+  end
+  
+  describe "delete_dumps" do
+    it "calls delete on the 1 oldest dump" do
+      aws.should_receive(:delete).with(anything, "oldest-dump")
+      deleter.clean
     end
   end
   
   describe "max_num_backups not set" do
-    it "should not call open_s3_connection" do
-      deleter.stub(:max_num_backups).and_return(nil)
-      deleter.should_not_receive(:open_s3_connection)
-      deleter.clean
-    end
-    
     it "should not call delete_extra_dumps" do
       deleter.stub(:max_num_backups).and_return(nil)
       deleter.should_not_receive(:delete_extra_dumps)

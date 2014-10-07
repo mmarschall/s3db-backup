@@ -7,6 +7,11 @@ namespace :s3db do
     S3dbBackup.backup
   end
   
+  desc "clean old backups based on the max num of backups specified in s3_config.yml"
+  task :clean => :environment do
+    S3dbBackup.clean
+  end
+  
   namespace :latest do
     desc "fetch the latest prodcution dump from our Amazon S3 remote backup"
     task :fetch => :environment do

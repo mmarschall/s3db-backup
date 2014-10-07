@@ -2,6 +2,10 @@ require File.expand_path(File.join(File.dirname(__FILE__), '..', 'spec_helper'))
 describe S3db::CommandLine do
 
   let(:command_line) { S3db::CommandLine.new(S3db::Configuration.new) }
+  let(:custom_command_line) {
+      YAML.stub(:load_file => s3_config_yml_contents.merge({'mysql_options' => ['quick', 'single-transaction']}))
+      S3db::CommandLine.new(S3db::Configuration.new)
+  }
 
   before do
     stub_configuration
@@ -13,7 +17,11 @@ describe S3db::CommandLine do
     let(:tempfile) { stub(:path => "/foobar") }
 
     it "includes mysqldump into the command" do
-      command_line.dump_command(tempfile).should =~ /mysqldump --user=app --password=secret s3db_backup_test/
+      command_line.dump_command(tempfile).should =~ /mysqldump --user=app --password='secret' s3db_backup_test/
+    end
+
+    it "includes custom mysqldump commands" do
+      custom_command_line.dump_command(tempfile).should =~ /mysqldump --user=app --password='secret' --quick --single-transaction s3db_backup_test/
     end
 
     it "includes gzip into the command" do
@@ -34,7 +42,7 @@ describe S3db::CommandLine do
     let(:latest_dump) { File.join(Rails.root, "db", "latest_prod_dump.sql") }
 
     it "includes mysql into the command" do
-      command_line.load_command(anything).should =~ /mysql --user=app --password=secret --database=s3db_backup_test/
+      command_line.load_command(anything).should =~ /mysql --user=app --password='secret' --database=s3db_backup_test/
     end
 
     describe "db host and port are given" do

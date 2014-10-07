@@ -35,7 +35,7 @@ module S3db
 
     def gzip_command
       gzip = locate_command_path('gzip')
-      "#{gzip} -9"
+      "#{gzip} -#{config.compression}"
     end
 
     def mysqldump_command
@@ -59,9 +59,16 @@ module S3db
     def mysql_params
       command_chain = []
       command_chain << "--user=#{config.db['username']}"
-      command_chain << "--password=#{config.db['password']}" if config.db['password']
+      command_chain << "--password='#{config.db['password']}'" if config.db['password']
       command_chain << "--host=#{config.db['host']}" if config.db['host']
       command_chain << "--port=#{config.db['port']}" if config.db['port']
+
+      if config.mysql_options.any?
+        config.mysql_options.each do |custom_command|
+          command_chain << "--#{custom_command}"
+        end
+      end
+
       command_chain.join(" ")
     end
   end

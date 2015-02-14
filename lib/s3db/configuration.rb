@@ -23,7 +23,9 @@ module S3db
     end
 
     def configure_aws
-      aws = YAML::load_file(File.join(Rails.root, "config", "s3_config.yml"))
+      template = ERB.new File.new(File.join(Rails.root, "config", "s3_config.yml")).read
+      aws = YAML.load template.result(binding)
+      
       validate_presence_of(aws, 'aws_access_key_id')
       validate_presence_of(aws, 'secret_access_key')
       validate_presence_of(aws, ::Rails.env)
